@@ -2,7 +2,7 @@
 
 Raquel Real (UCL), Anni Moore (NIH), Sara Bandres-Ciga (NIH)
 
-## WGS analysis 
+## WGS analysis - AMP-PD (www.amp-pd.org)
 
 ### Fisher exact test 
 
