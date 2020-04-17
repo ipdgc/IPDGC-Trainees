@@ -16,12 +16,14 @@ plink --bfile ATP10B_WGS_AMP_PD_pheno --update-sex /data/LNG/saraB/AMP_PD/toupda
 plink --bfile ATP10B_WGS_AMP_PD_pheno_sex --fisher --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --covar /data/LNG/saraB/AMP_PD/covs_Mike.txt --covar-name SEX, AGE, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10 --out ATP10B_WGS_AMP_PD --ci 0.95
 ```
 
-### Annotation (ANNOVAR)
+### Annotation
 
 ```
 plink --bfile ATP10B_WGS_AMP_PD_pheno_sex --recode 'vcf-fid' --out ATP10B_WGS_AMP_PD_pheno_sex
 bgzip ATP10B_WGS_AMP_PD_pheno_sex.vcf
 tabix -f -p vcf ATP10B_WGS_AMP_PD_pheno_sex.vcf.gz
+
+Now using ANNOVAR
 
 table_annovar.pl /data/LNG/saraB/AMP_PD/genesfortrainees/ATP10B/ATP10B_WGS_AMP_PD_pheno_sex.vcf.gz $ANNOVAR_DATA/hg38 -buildver hg38 \
 --thread 16 \
@@ -121,12 +123,14 @@ plink --bfile /data/LNG/saraB/HARDCALLS_PD_september_2018_no_cousins --remove-fa
 plink --bfile ATP10B.GWAS --fisher --covar /data/LNG/saraB/IPDGC_all_samples_covariates.tab --covar-name sex,AGE,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,DUTCH,FINLAND,GERMANY,MCGILL,MF,NIA,OSLO,PROBAND,PROPARK,SHULMAN,SPAIN3,SPAIN4,TUBI,UK_GWAS,VANCE --out ATP10B_GWAS --make-bed --ci 0.95
 ```
 
-### Annotate VCF with ANNOVAR 
+### Annotation
 
 ```
 plink --bfile ATP10B.GWAS --recode 'vcf-fid' --out ATP10B.GWAS
 bgzip ATP10B.GWAS.vcf
 tabix -f -p vcf ATP10B.GWAS.vcf.gz
+
+Now using ANNOVAR
 
 table_annovar.pl /data/LNG/saraB/ATP10B/hardcallsNoNeuroX/vcf/ATP10B.GWAS.vcf.gz /data/LNG/saraB/annovar/humandb/ -buildver hg19 \
 --thread 16 \
