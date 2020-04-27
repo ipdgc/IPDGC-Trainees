@@ -212,16 +212,16 @@ cp ATP10B_WGS_AMP_PD_pheno_sex.fam ATP10B_WGS_AMP_PD_pheno_sex_mod.fam
 cp ATP10B_WGS_AMP_PD_pheno_sex.bed ATP10B_WGS_AMP_PD_pheno_sex_mod.bed
 ```
 
-#### Filter and extract coding variants
+#### Filter and extract coding variants without synonymous variants
 
 ```
-plink --bfile /data/LNG/anni/ATP10B_2/ATP10B_WGS_AMP_PD_pheno_sex_mod --chr 5 --extract /data/LNG/anni/ATP10B_2/ATP10B.trimmed.annotation.coding.variants.SNPs.WGS.txt --make-bed --out /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn
+plink --bfile /data/LNG/anni/ATP10B_2/ATP10B_WGS_AMP_PD_pheno_sex_mod --chr 5 --extract ATP10B.trimmed.annotation.coding.variants.WGS.not_synonymous.SNPs.txt --make-bed --out /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn
 ```
 
 #### Recode to get genotypes of coding variants
 
 ```
-plink --bfile /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn --recode A --out /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn.recode
+plink --bfile /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn --max-maf 0.05 --out /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn.maxmaf0.05
 plink --bfile /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn.maxmaf0.05 --recode A --out /data/LNG/anni/ATP10B_2/ATP10B.WGS.CODING.not_syn.maxmaf0.05.recode
 ```
 
