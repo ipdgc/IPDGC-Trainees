@@ -11,7 +11,7 @@
 #### INSPIRATION
 - **Working Title:** Assessment of LIN28A variants in Parkinson's disease
 - **Aim:** To scrutinize whether LIN28A (LOF) mutations are causative for Parkinson's disease
-- **Brief description:** A loss of function LIN28A mutation has been reported to cause early onset - - Parkinson's disease. However replication in a large cohort is needed.
+- **Brief Description:** A loss of function LIN28A mutation has been reported to cause early onset Parkinson's disease. However replication in a large cohort is needed. So we were inspired to look into the IPDGC + AMP PD cohorts
 - **Original publication:** [https://www.ncbi.nlm.nih.gov/pubmed/31750563](https://www.ncbi.nlm.nih.gov/pubmed/31750563)
 
 #### PROPOSED WORKFLOW 
