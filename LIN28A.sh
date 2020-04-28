@@ -26,6 +26,10 @@
 ##### 0. GETTING STARTED ################################################################################################
 #########################################################################################################################
 
+# Initializing some variables 
+## REMOVED paths to files 
+COV_NAMES="SEX,AGE,FAMILY_HISTORY,EDUCATION,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,STUDY_BioFIND,STUDY_PDBP,STUDY_PPMI"
+
 # Load the necessary modules 
 module load plink #v1.9
 module load samtools #v1.9
