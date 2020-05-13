@@ -347,10 +347,15 @@ rvtest --noweb --hide-covar --inVcf $WORKING_DIR/LIN28A_WGS_AMP_PD_mac3.vcf.gz \
 ## 8. ANAYSIS IN IPDGC COHORT
 
 A. Getting Started 
+
 B. Subset PLINK Binaries + Convert to VCFs
+
 C. Output Frequency with PLINK
+
 D. Logistic Regression with PLINK
+
 E. Annotate VCFs with Annovar + KGGSeq
+
 F. RVTESTS Burden tests
 
 #### A. Getting Started 
