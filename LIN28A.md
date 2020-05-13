@@ -24,6 +24,7 @@
 #### [5. Annotate via ANNOVAR](#5)
 #### [6. Burden Analysis via RVTests](#6)
 #### [7. Single variant Wald and score tests via RVTests](#7)
+#### [8. Analysis in IPDGC Cohort](#8)
 
 <a id="0"></a>
 ## 0. GETTING STARTED 
@@ -342,3 +343,98 @@ rvtest --noweb --hide-covar --inVcf $WORKING_DIR/LIN28A_WGS_AMP_PD_mac3.vcf.gz \
 	# Done 21.04.2020
 ```
 
+<a id="8"></a>
+## 8. ANAYSIS IN IPDGC COHORT
+
+A. Getting Started 
+B. Subset PLINK Binaries + Convert to VCFs
+C. Output Frequency with PLINK
+D. Logistic Regression with PLINK
+E. Annotate VCFs with Annovar + KGGSeq
+F. RVTESTS Burden tests
+
+#### A. Getting Started 
+```bash
+mkdir $WORKING_DIR/
+cd $WORKING_DIR/
+
+mkdir hardcallsNoNeuroX hardcallsNoNeuroX/bin 
+mkdir hardcallsNoNeuroX/freq hardcallsNoNeuroX/score 
+mkdir hardcallsNoNeuroX/burden hardcallsNoNeuroX/vcf 
+mkdir hardcallsNoNeuroX/annotation hardcallsNoNeuroX/burden 
+mkdir hardcallsNoNeuroX/logistic hardcallsNoNeuroX/freq
+```
+
+#### B. Subset PLINK Binaries + Convert to VCFs
+
+```bash
+# ---------Remove NeuroX + keep males + genotype quality of 15% or less missingness
+plink --bfile $WORKING_DIR/HARDCALLS_PD_september_2018_no_cousins \
+--remove-fam $WORKING_DIR/NeuroX.fID.txt \
+--chr 1 --geno 0.15 --from-bp 26737269 --to-bp 26756213 \
+--make-bed --out hardcallsNoNeuroX/bin/LIN28A.GWAS
+
+plink --bfile hardcallsNoNeuroX/bin/LIN28A.GWAS --recode vcf --out hardcallsNoNeuroX/vcf/LIN28A.GWAS
+
+cd hardcallsNoNeuroX/vcf
+bgzip LIN28A.GWAS.vcf
+tabix -f -p vcf LIN28A.GWAS.vcf.gz
+```
+
+#### C. Output Frequency
+```bash
+cd $WORKING_DIR/
+## Overall
+plink --bfile $WORKING_DIR/HARDCALLS_PD_september_2018_no_cousins --chr 1 --from-bp 26737269 --to-bp 26756213  --remove-fam $WORKING_DIR/NeuroX.fID.txt --freq --geno 0.15 --out hardcallsNoNeuroX/freq/LIN28A
+
+## Case-control
+
+plink --bfile $WORKING_DIR/HARDCALLS_PD_september_2018_no_cousins --chr 1 --from-bp 26737269 --to-bp 26756213  --remove-fam $WORKING_DIR/NeuroX.fID.txt --freq case-control --geno 0.15 --out hardcallsNoNeuroX/freq/LIN28A
+```
+
+#### D. Output Logistic Regression
+```bash
+plink --bfile $WORKING_DIR/HARDCALLS_PD_september_2018_no_cousins \
+--remove-fam $WORKING_DIR/NeuroX.fID.txt \
+--chr 1 --from-bp 26737269 --to-bp 26756213 \
+--geno 0.15 --covar $WORKING_DIR/IPDGC_all_samples_covariates.tab \
+--covar-name sex,AGE,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,DUTCH,FINLAND,GERMANY,MCGILL,MF,NIA,OSLO,PROBAND,PROPARK,SHULMAN,SPAIN3,SPAIN4,TUBI,UK_GWAS,VANCE \
+--assoc --out hardcallsNoNeuroX/logistic/LIN28A
+```
+#### E. Annotate VCFs with ANNOVAR
+
+```bash
+mkdir $WORKING_DIR/annovar
+
+# Downloading databases 
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar refGene humandb/
+# annotate_variation.pl -buildver hg19 -downdb cytoBand humandb/
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar ensGene humandb/
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar exac03 humandb/ 
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar avsnp147 humandb/ 
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar dbnsfp30a humandb/
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar gnomad211_genome humandb/
+
+table_annovar.pl $WORKING_DIR/hardcallsNoNeuroX/vcf/LIN28A.GWAS.vcf.gz $WORKING_DIR/annovar/humandb/ -buildver hg19 \
+--thread 16 \
+-out $WORKING_DIR/hardcallsNoNeuroX/annotation/LIN28A.annovar \
+-remove -protocol avsnp147,refGene,ensGene,gnomad211_genome \
+-operation f,g,g,f \
+-nastring . \
+-vcfinput
+
+cd $WORKING_DIR/hardcallsNoNeuroX/annotation
+head -1 LIN28A.annovar.hg19_multianno.txt > header.txt
+colct="$(wc -w header.txt| cut -f1 -d' ')"
+cut -f1-$colct LIN28A.annovar.hg19_multianno.txt > LIN28A.trimmed.annotation.txt
+```
+
+#### F. Burden Analysis
+
+Note that here we do not adjust by AGE since the model does not fit in RVTests
+
+```bash
+cd $WORKING_DIR/LIN28A
+
+rvtest --noweb --inVcf $WORKING_DIR/hardcallsNoNeuroX/vcf/LIN28A.GWAS.vcf.gz --pheno $WORKING_DIR/IPDGC_all_samples_covariates.vcf.tab --covar $WORKING_DIR/IPDGC_all_samples_covariates.vcf.tab --covar-name sex,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,DUTCH,FINLAND,GERMANY,MCGILL,MF,NIA,OSLO,PROBAND,PROPARK,SHULMAN,SPAIN3,SPAIN4,TUBI,UK_GWAS,VANCE --burden cmc,zeggini,mb,fp,cmcWald --kernel skat,skato --geneFile $WORKING_DIR/refFlat_hg19.txt --freqUpper 0.03 --out hardcallsNoNeuroX/burden/BURDEN.LIN28A.maf03
+```
