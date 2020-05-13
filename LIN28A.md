@@ -11,7 +11,7 @@
 #### INSPIRATION
 - **Working Title:** Assessment of LIN28A variants in Parkinson's disease
 - **Aim:** To scrutinize whether LIN28A (LOF) mutations are causative for Parkinson's disease
-- **Brief Description:** A loss of function LIN28A mutation has been reported to cause early onset Parkinson's disease. However replication in a large cohort is needed. So we were inspired to look into the IPDGC + AMP PD cohorts
+- **Brief Description:** A loss-of-function LIN28A mutation has been reported to cause early onset Parkinson's disease. However, replication in a large cohort is needed. So we were inspired to look into the IPDGC + AMP PD cohorts
 - **Original Publication:** [https://www.ncbi.nlm.nih.gov/pubmed/31750563](https://www.ncbi.nlm.nih.gov/pubmed/31750563)
 
 #### PROPOSED WORKFLOW 
@@ -58,7 +58,7 @@ module load rvtests #v2.1.0
 cd $WORKING_DIR
 
 # Extract the LIN28A region
-	# Cornelis recommends --mac 3 for statistics and --mac 1 for burdens 
+	# These are hg38 co-ordinates 
 # --mac 1
 plink --bfile $AMP_PLINK \
 --chr 1 --from-bp 26410817 --to-bp 26429728 \
