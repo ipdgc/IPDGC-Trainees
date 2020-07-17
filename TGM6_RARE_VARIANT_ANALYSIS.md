@@ -15,12 +15,12 @@
 
 #### WORKFLOW:
 
- **1.  Extract the TGM6 region from the AMP-PD WGS**
- ****2. Run --model and --assoc in PLINK**
-3. Generate VCFs
+ 1. Extract the TGM6 region from the AMP-PD WGS
+ 2. Run --model and --assoc in PLINK
+ 3. Generate VCFs
  4. Annotate variants with ANNOVAR
-  5. Burden Analysis with RVtests
-   6. Single variant Wald and score test with RVtests**
+ 5. Burden Analysis with RVtests
+ 6. Single variant Wald and score test with RVtests
 
 ## 1. EXTRACT TGM6 VARIANTS
 
