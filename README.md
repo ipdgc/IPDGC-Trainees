@@ -29,6 +29,12 @@ Orginial publication can be found here https://pubmed.ncbi.nlm.nih.gov/31303019/
 IPDGC replication report can be found here https://www.sciencedirect.com/science/article/pii/S0197458020302190
 
 
+## ANG
+
+Orginial publication can be found here https://pubmed.ncbi.nlm.nih.gov/22190368/
+
+IPDGC replication report can be found here "coming soon..."
+
 ## TGM6
 
 Orginial publication can be found here https://pubmed.ncbi.nlm.nih.gov/32259886/
