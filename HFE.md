@@ -1,5 +1,3 @@
-#!/bin/bash
-
 ####### GWAS #######
 
 module load plink samtools rvtests R annovar
