@@ -9,7 +9,7 @@ mkdir hardcallsNoNeuroX hardcallsNoNeuroX/bin hardcallsNoNeuroX/freq hardcallsNo
 ```
 ### ==================== 1. GWAS: Subset PLINK Binaries + Convert to VCFs ====================
 
-HFE positions on hg19
+#### HFE positions on hg19
 
 ```
 plink --bfile /data/LNG/saraB/HARDCALLS_PD_september_2018_no_cousins --remove-fam /data/LNG/saraB/NeuroX.fID.txt --geno 0.05 --chr 6 --from-bp 26087281 --to-bp 26098343 --make-bed --out hardcallsNoNeuroX/bin/HFE.GWAS
@@ -20,7 +20,7 @@ cd hardcallsNoNeuroX/vcf
 bgzip HFE.GWAS.vcf
 tabix -f -p vcf HFE.GWAS.vcf.gz
 ```
-HFE_100KB positions on hg19
+#### HFE_100KB positions on hg19
 
 ```
 plink --bfile /data/LNG/saraB/HARDCALLS_PD_september_2018_no_cousins --remove-fam /data/LNG/saraB/NeuroX.fID.txt --geno 0.05 --chr 6 --from-bp 25987281 --to-bp 26198343 --make-bed --out hardcallsNoNeuroX/bin/HFE_100KB.GWAS
@@ -35,19 +35,24 @@ tabix -f -p vcf HFE_100KB.GWAS.vcf.gz
 
 ### ==================== 2. GWAS: Fisher exact test and logistic regression ====================
 
+#### HFE
+
 ```
 cd /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE
 
 plink --bfile hardcallsNoNeuroX/bin/HFE.GWAS --chr 6 --from-bp 26087281 --to-bp 26098343 --fisher --out hardcallsNoNeuroX/freq/HFE
 plink --bfile hardcallsNoNeuroX/bin/HFE.GWAS --chr 6 --from-bp 26087281 --to-bp 26098343 --covar /data/LNG/saraB/IPDGC_all_samples_covariates.tab --covar-name sex,AGE,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10 --logistic --out hardcallsNoNeuroX/logistic/HFE_ci95 --ci 0.95
 ```
+
+#### HFE +/- 100kb
+
 ```
 cd /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE
 
 plink --bfile hardcallsNoNeuroX/bin/HFE_100KB.GWAS --chr 6 --from-bp 25987281 --to-bp 26198343 --fisher --out hardcallsNoNeuroX/freq/HFE_100KB
 plink --bfile hardcallsNoNeuroX/bin/HFE_100KB.GWAS --chr 6 --from-bp 25987281 --to-bp 26198343 --covar /data/LNG/saraB/IPDGC_all_samples_covariates.tab --covar-name sex,AGE,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10 --logistic --out hardcallsNoNeuroX/logistic/HFE_100KB_ci95 --ci 0.95
 ```
-### =============== 3. GWAS: Fisher exact test and logistic regression: Males versus Females ===============
+### ==== 3. GWAS: Fisher exact test and logistic regression: Males versus Females =====
 
 #### HFE
 
@@ -59,7 +64,7 @@ plink --bfile hardcallsNoNeuroX/bin/HFE.GWAS --chr 6 --from-bp 26087281 --to-bp 
 plink --bfile hardcallsNoNeuroX/bin/HFE.GWAS --chr 6 --from-bp 26087281 --to-bp 26098343 --filter-females --fisher --out hardcallsNoNeuroX/freq/HFE_females_ci95 --ci 0.95
 plink --bfile hardcallsNoNeuroX/bin/HFE.GWAS --chr 6 --from-bp 26087281 --to-bp 26098343 --filter-females --covar /data/LNG/saraB/IPDGC_all_samples_covariates.tab --covar-name sex,AGE,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10 --logistic --out hardcallsNoNeuroX/logistic/HFE_females_ci95 --ci 0.95
 ```
-#### HFE + 100kb
+#### HFE +/- 100kb
 
 ```
 cd /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE
@@ -71,6 +76,8 @@ plink --bfile hardcallsNoNeuroX/bin/HFE_100KB.GWAS --chr 6 --from-bp 25987281 --
 ```
 
 ### ==================== 4. GWAS: Annotation ====================
+
+#### HFE
 
 ```
 mkdir /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE/annovar/
@@ -103,6 +110,8 @@ colct="$(wc -w header.txt| cut -f1 -d' ')"
 cut -f1-$colct HFE.annovar.hg19_multianno.txt > HFE.GWAS.trimmed.annotation.txt
 ```
 
+#### HFE +/- 100kb
+
 ```
 module load annovar
 
@@ -124,6 +133,8 @@ cut -f1-$colct HFE_100KB.annovar.hg19_multianno.txt > HFE_100KB.GWAS.trimmed.ann
 
 #### Generating list of coding variants
 
+#### HFE
+
 ```
 awk '$7=="exonic" {print}' HFE.GWAS.trimmed.annotation.txt > HFE.GWAS.trimmed.annotation.coding.variants.txt
 awk '{print $1" "$2" "$2" "$7}' HFE.GWAS.trimmed.annotation.coding.variants.txt > HFE.GWAS.trimmed.annotation.coding.variants.SNPs.txt
@@ -133,6 +144,8 @@ plink --bfile  /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE/hardcallsNoNe
 bgzip HFE_CODING_GWAS.vcf
 tabix -f -p vcf HFE_CODING_GWAS.vcf.gz
 ```
+
+#### HFE +/- 100kb
 
 ```
 awk '$7=="exonic" {print}' HFE_100KB.GWAS.trimmed.annotation.txt > HFE_100KB.GWAS.trimmed.annotation.coding.variants.txt
@@ -173,14 +186,15 @@ rvtest --noweb --inVcf /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE/hardc
 rvtest --noweb --inVcf /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE/hardcallsNoNeuroX/vcf/HFE_100KB_CODING_GWAS.vcf.gz --pheno /data/LNG/saraB/IPDGC_all_samples_covariates.vcf.tab --covar /data/LNG/saraB/IPDGC_all_samples_covariates.vcf.tab --covar-name sex,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,DUTCH,FINLAND,GERMANY,MCGILL,MF,NIA,OSLO,PROBAND,PROPARK,SHULMAN,SPAIN3,SPAIN4,TUBI,UK_GWAS,VANCE --burden cmc,zeggini,mb,fp,cmcWald --kernel skat,skato --geneFile /data/LNG/saraB/refFlat_hg19.txt --freqUpper 0.01 --out /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE/hardcallsNoNeuroX/burden/BURDEN.HFE_100KB.GWAS.maf001_CODING
 ```
 
-### ============== 6. WGS: Fisher exact test and logistic regression: Males versus Females ================
+### ==== 6. WGS: Fisher exact test and logistic regression: Males versus Females ====
 
-HFE and HFE_100KB positions on hg38
+#### HFE and HFE_100KB positions on hg38
 
 ```
 cd /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE/WGS/
 ```
 
+#### HFE
 ```
 plink --bfile HFE_WGS_AMP_PD --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --make-bed --out HFE_WGS_AMP_PD_pheno
 plink --bfile HFE_WGS_AMP_PD_pheno --update-sex /data/LNG/saraB/AMP_PD/toupdatesex.txt --make-bed --out HFE_WGS_AMP_PD_pheno_sex
@@ -188,6 +202,7 @@ plink --bfile HFE_WGS_AMP_PD_pheno_sex --fisher --pheno /data/LNG/saraB/AMP_PD/p
 plink --bfile HFE_WGS_AMP_PD_pheno_sex --logistic --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --covar /data/LNG/saraB/AMP_PD/covs_Mike.txt --covar-name SEX, AGE, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10 --out HFE_WGS_AMP_PD --ci 0.95
 ```
 
+#### HFE +/- 100KB
 ```
 plink --bfile HFE_100kb_WGS_AMP_PD --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --make-bed --out HFE_100kb_WGS_AMP_PD_pheno
 plink --bfile HFE_100kb_WGS_AMP_PD_pheno --update-sex /data/LNG/saraB/AMP_PD/toupdatesex.txt --make-bed --out HFE_100kb_WGS_AMP_PD_pheno_sex
@@ -203,7 +218,7 @@ plink --bfile HFE_WGS_AMP_PD_pheno_sex --fisher --pheno /data/LNG/saraB/AMP_PD/p
 plink --bfile HFE_WGS_AMP_PD_pheno_sex --logistic --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --covar /data/LNG/saraB/AMP_PD/covs_Mike.txt --covar-name SEX, AGE, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10 --out HFE_WGS_AMP_PD_males --ci 0.95 --filter-males
 ```
 
-#### HFE + 100KB
+#### HFE +/- 100KB
 ```
 plink --bfile HFE_100kb_WGS_AMP_PD_pheno_sex --fisher --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --out HFE_100kb_WGS_AMP_PD_females --filter-females
 plink --bfile HFE_100kb_WGS_AMP_PD_pheno_sex --logistic --pheno /data/LNG/saraB/AMP_PD/pheno_Mike.txt --covar /data/LNG/saraB/AMP_PD/covs_Mike.txt --covar-name SEX, AGE, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10 --out HFE_100kb_WGS_AMP_PD_females --ci 0.95 --filter-females
@@ -212,6 +227,7 @@ plink --bfile HFE_100kb_WGS_AMP_PD_pheno_sex --logistic --pheno /data/LNG/saraB/
 ```
 ### ==================== 8. WGS: Annotation ====================
 
+#### HFE
 ```
 plink --bfile HFE_WGS_AMP_PD_pheno_sex --recode 'vcf-fid' --out HFE_WGS_AMP_PD_pheno_sex
 bgzip HFE_WGS_AMP_PD_pheno_sex.vcf
@@ -230,6 +246,7 @@ colct="$(wc -w header.txt| cut -f1 -d' ')"
 cut -f1-$colct HFE_WGS.annovar.hg38_multianno.txt > HFE.WGS.trimmed.annotation.txt
 ```
 
+#### HFE +/- 100KB
 ```
 plink --bfile HFE_100kb_WGS_AMP_PD_pheno_sex --recode 'vcf-fid' --out HFE_100kb_WGS_AMP_PD_pheno_sex
 bgzip HFE_100kb_WGS_AMP_PD_pheno_sex.vcf
@@ -252,6 +269,7 @@ cut -f1-$colct HFE_100kb_WGS.annovar.hg38_multianno.txt > HFE_100kb_WGS.trimmed.
 
 #### Generating list of coding variants
 
+#### HFE
 ```
 awk '$6=="exonic" {print}' HFE.WGS.trimmed.annotation.txt > HFE.trimmed.annotation.coding.variants.WGS.txt
 awk '{print $1" "$2" "$2" "$7}' HFE.trimmed.annotation.coding.variants.WGS.txt > HFE.trimmed.annotation.coding.variants.WGS.SNPs.txt
@@ -262,6 +280,7 @@ bgzip HFE_CODING_AMP.vcf
 tabix -f -p vcf HFE_CODING_AMP.vcf.gz
 ```
 
+#### HFE +/- 100KB
 ```
 awk '$6=="exonic" {print}' HFE_100kb_WGS.trimmed.annotation.txt > HFE_100kb.trimmed.annotation.coding.variants.WGS.txt
 awk '{print $1" "$2" "$2" "$7}' HFE_100kb.trimmed.annotation.coding.variants.WGS.txt > HFE_100kb.trimmed.annotation.coding.variants.WGS.SNPs.txt
