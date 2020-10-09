@@ -1,4 +1,4 @@
-####### GWAS #######
+# GWAS
 
 module load plink samtools rvtests R annovar
 
@@ -7,7 +7,7 @@ mkdir /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE
 cd /data/LNG/saraB/AMP_PD/genesfortrainees_2ndpart/HFE
 mkdir hardcallsNoNeuroX hardcallsNoNeuroX/bin hardcallsNoNeuroX/freq hardcallsNoNeuroX/score hardcallsNoNeuroX/burden hardcallsNoNeuroX/vcf hardcallsNoNeuroX/annotation hardcallsNoNeuroX/logistic
 ```
-# ==================== 1. Subset PLINK Binaries + Convert to VCFs ====================
+### ==================== 1. Subset PLINK Binaries + Convert to VCFs ====================
 
 HFE positions on hg19
 
