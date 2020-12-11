@@ -40,3 +40,9 @@ IPDGC replication report can be found here "coming soon..."
 Orginial publication can be found here https://pubmed.ncbi.nlm.nih.gov/32259886/
 
 IPDGC replication report can be found here "coming soon..."
+
+## PTRHD1
+
+Original publication can be found here: https://pubmed.ncbi.nlm.nih.gov/30398675/
+
+IPDGC replication report can be found here: "coming soon..."
