@@ -46,3 +46,9 @@ IPDGC replication report can be found here "coming soon..."
 Original publication can be found here: https://pubmed.ncbi.nlm.nih.gov/30398675/
 
 IPDGC replication report can be found here: "coming soon..."
+
+## KTN1
+
+Original publication can be found here: https://pubmed.ncbi.nlm.nih.gov/32655362/
+
+IPDGC replication report can be found here: "coming soon..."
