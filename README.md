@@ -12,7 +12,7 @@ IPDGC replication report can be found here https://pubmed.ncbi.nlm.nih.gov/32556
 ## LIN28A
 Orginial publication can be found here https://pubmed.ncbi.nlm.nih.gov/31750563/
 
-IPDGC replication report can be found here https://www.medrxiv.org/content/10.1101/2020.06.10.20103291v1
+IPDGC replication report can be found here https://www.sciencedirect.com/science/article/pii/S0197458020304115#!
 
 
 ## NUS1
