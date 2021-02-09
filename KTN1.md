@@ -104,9 +104,9 @@
 
 ## 2. Whole Genome Analysis (AMP-PD)
 #### 1. Extract KTN1 Region
-#### 2. Annotation
-#### 3. Burden analysis
-#### 4. Single Variant Wald and Score Tests via RVTESTS 
+#### 2. Annotate with Annovar
+#### 3. Burden analysis with RVTESTS
+#### 4. Single Variant Wald and Score Tests with RVTESTS 
  
  
     #!/bin/bash
