@@ -289,6 +289,17 @@
     --covar-name SEX,AAO,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10 \
     --single wald,score --geneFile $FILE_DIR/refFlat_hg38.txt \
     --out AMP_PD_mac3.KTN1.MB.LOGISTIC.allPCs
+    
+    # annotate results
+    table_annovar.pl AMP_PD_mac3.KTN1.MB.LOGISTIC.allPCs.SingleScore.assoc.avinput ../humandb/ \
+    -buildver hg38 -out AMP_PD_mac3.KTN1.MB.LOGISTIC.allPCs.SingleScore.assoc \
+    -remove -protocol refGene,avsnp150,gnomad211_genome,clinvar_20200316 \
+    -operation g,f,f,f -nastring .
+
+    head -1 $KTN1_DIR/amppd/rvtest/AMP_PD_mac3.KTN1.MB.LOGISTIC.allPCs.SingleScore.assoc.hg38_multianno.txt > header.txt
+    colct="$(wc -w header.txt| cut -f1 -d' ')"
+    cut -f1-$colct AMP_PD_mac3.KTN1.MB.LOGISTIC.allPCs.SingleScore.assoc.hg38_multianno.txt > $KTN1_DIR/amppd/rvtest/AMP_PD_mac3.KTN1.MB.LOGISTIC.allPCs.SingleScore.assoc.trimmed.annotation.txt
+
 
 # Summary Statistics 
 ### 1. GWAS Summary Statistics (Nalls 2019)
