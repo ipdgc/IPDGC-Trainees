@@ -22,7 +22,7 @@
     mkdir hardcallsNoNeuroX/annotation hardcallsNoNeuroX/burden 
     mkdir hardcallsNoNeuroX/logistic hardcallsNoNeuroX/freq
 
-    # ==================== 1. Subset PLINK Binaries ====================
+    # ==================== 1. Subset PLINK Binaries to cis-KTN1 region ====================
     ## Remove NeuroX + keep males + genotype quality of 15% or less missingness
     
     ##KTN1 region 56025790 - 56168244 +/- MB
@@ -46,7 +46,7 @@
     bgzip KTN1.GWAS.MB.vcf
     tabix -f -p vcf KTN1.GWAS.MB.vcf.gz
 
-    # ==================== 2. Output Frequency ==================== 
+    # ==================== 2. Output Frequency via PLINK ==================== 
     cd $KTN1_DIR/
     # Overall
     plink --bfile $FILE_DIR/HARDCALLS_PD_september_2018_no_cousins \
@@ -65,7 +65,7 @@
     --out hardcallsNoNeuroX/freq/KTN1.MB
         # Done 11.01.2021
 
-    # ==================== 3. Output Logistic Regression ====================
+    # ==================== 3. Output Logistic Regression via PLINK ====================
     plink --bfile $FILE_DIR/HARDCALLS_PD_september_2018_no_cousins \
     --remove-fam $FILE_DIR/NeuroX.fID.txt \
     --chr 14 --from-bp 55025790 --to-bp 57168244 \
@@ -76,7 +76,7 @@
     --out hardcallsNoNeuroX/logistic/KTN1
         # Done 12.01.2020
 
-    # ==================== 4. Annotate VCFs with Annovar ====================
+    # ==================== 4. Annotate VCFs via Annovar ====================
 
     # Downloading databases 
     # annotate_variation.pl -buildver hg19 -downdb -webfrom annovar refGene humandb/
@@ -103,7 +103,7 @@
 
 
 ## 2. Whole Genome Analysis (AMP-PD)
-#### 1. Extract KTN1 Region
+#### 1. Extract KTN1 Region with PLINK
 #### 2. Annotate with Annovar
 #### 3. Burden analysis with RVTESTS
 #### 4. Single Variant Wald and Score Tests with RVTESTS 
@@ -138,7 +138,7 @@
         # Done 07.09.2020
 
 
-    # ==================== 1. Extract KTN1 Region  ====================
+    # ==================== 1. Extract cis-KTN1 Region via PLINK  ====================
 
     ##extract KTN1 region
     # Extract the KTN1 region
@@ -176,7 +176,7 @@
                 # Among remaining phenotypes, 1735 are cases and 1100 are controls.
 
 
-    # ==================== 2. Annotation ====================
+    # ==================== 2. Annotation via Annovar ====================
 
     ## no filters
     plink --bfile KTN1_WGS_AMP_PD_pheno_sex_MB --recode 'vcf-fid' --out KTN1_WGS_AMP_PD_pheno_sex_MB
@@ -235,7 +235,7 @@
 
     
 
-    # ==================== 4. Burden anaysis on all variants ====================
+    # ==================== 4. Burden analysis on all variants via RVTESTS ====================
  
 
     # mac 1
