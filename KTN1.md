@@ -293,7 +293,8 @@
 # Summary Statistics 
 ### 1. GWAS Summary Statistics (Nalls 2019)
     # ==================== 1. Extract gene from GWAS sum stats + Zoom plots ====================
-
+    
+    #bash
     # KTN1 positions on hg19 (14: 56025790 - 56168244) 
     # cis-KTN1 (14: 55025790 - 57168244) --> KTN1.MB.txt
 
@@ -332,7 +333,8 @@
 
 
 ### 2. Age of Onset GWAS Summary Statistics (Blauwendraat 2019)
-
+    
+    #R
     ## Blauwendraat 2019
     library(data.table)
     library(dplyr)
