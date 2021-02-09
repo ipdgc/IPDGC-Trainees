@@ -366,6 +366,6 @@
     locuszoom --metal $KTN1_DIR/sum_stats/cisKTN1_variants.Blauwendraat.tab --pvalcol P-value --markercol SNP --chr 14 --start 55025790 --end 57168244 --flank 1000kb --pop EUR --build hg19 --source 1000G_March2012 --plotonly &
 
 # KTN1 expression analysis
-## 1. eQTL (GTEx v8)
+## 1. eQTL (GTEx v8) & BRAINEAC
 ## 2. Expression covariate correction + T-test (AMP-PD)
     all_ktn1_expression_notebook_github.ipynb
