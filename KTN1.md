@@ -5,7 +5,7 @@
 #### 2. Output Frequency with PLINK
 #### 3. Logistic Regression with PLINK
 #### 4. Annotate VCFs with Annovar 
-#### 5. RVTESTS Burden tests
+
     #!/bin/bash
 
     #hg19
@@ -103,11 +103,10 @@
 
 
 ## 2. Whole Genome Analysis (AMP-PD)
-#### 1. Extract KTN1 Region in terra
-#### 2. Fisher test in PLINK
-#### 3. Annotation
-#### 4. Burden analysis
-#### 5. Single Variant Wald and Score Tests via RVTESTS 
+#### 1. Extract KTN1 Region
+#### 2. Annotation
+#### 3. Burden analysis
+#### 4. Single Variant Wald and Score Tests via RVTESTS 
  
  
     #!/bin/bash
