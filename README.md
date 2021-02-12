@@ -52,3 +52,10 @@ IPDGC replication report can be found here: "coming soon..."
 Original publication can be found here: https://pubmed.ncbi.nlm.nih.gov/32655362/
 
 IPDGC replication report can be found here: "coming soon..."
+
+## RIC3
+
+Orginal publication and a follow-up study can be found at: https://pubmed.ncbi.nlm.nih.gov/27055476/ , https://pubmed.ncbi.nlm.nih.gov/28153381/ 
+
+IPDGC replication report can be found here: "coming soon..."
+
