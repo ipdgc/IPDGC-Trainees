@@ -59,3 +59,8 @@ Orginal publication and a follow-up study can be found at: https://pubmed.ncbi.n
 
 IPDGC replication report can be found here: "coming soon..."
 
+## SLC25A46
+
+Orginal publication can be found at: https://pubmed.ncbi.nlm.nih.gov/32259769/
+
+IPDGC replication report can be found here: "coming soon..."
