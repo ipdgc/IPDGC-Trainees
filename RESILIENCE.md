@@ -11,7 +11,7 @@ module load R
 cd /data/LNG/saraB/PRS_resilience/FINAL/
 ```
 
-### IPDGC data - 7204 are cases and 9412 are controls
+### 1. IPDGC data - 7204 are cases and 9412 are controls
 ### Remove problematic regions from Chang 2017 summary stats + filter by MAF 0.01
 ```
 MHC region (hg19): chr6:28477797-33448354
@@ -368,7 +368,7 @@ ggsave("resilience_IPDGC.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 ################################################################################################################################################################
 
-### UKBB data - 2639 are cases and 14301 are controls
+### 2. UKBB data - 2639 are cases and 14301 are controls
 
 ### Format cov file 
 ```
@@ -684,7 +684,7 @@ ggsave("resilience_UKB.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 ```
 ################################################################################################################################################################
 
-### AMP_PD data - version 2.5 - 2248 are cases and 2817 are controls
+### 3. AMP_PD data - version 2.5 - 2248 are cases and 2817 are controls
 
 ### Format cov file
 ```
