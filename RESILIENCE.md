@@ -1,6 +1,6 @@
 # The genetic architecture of resilience in Parkinson's disease
 
-Sara Bandres-Ciga, Hui Liu,Mohammad Dehestani,
+Sara Bandres-Ciga, Hui Liu, Mohammad Dehestani
 
 ### Load modules and set up working directory
 ```
