@@ -54,7 +54,7 @@ genoml discrete supervised train --prefix risk_p1E7
 genoml discrete supervised train --prefix risk_p1E8
 ```
 
-#### Tune and cross-validate models.
+#### c) Tune and cross-validate models.
 ```
 genoml discrete supervised tune --prefix risk_p1E2 --max_tune 25
 genoml discrete supervised tune --prefix risk_p1E3 --max_tune 10 --n_cv 3
