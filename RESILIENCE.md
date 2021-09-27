@@ -2,7 +2,7 @@
 
 Sara Bandres-Ciga, Hui Liu, Mohammad Dehestani
 
-### Load modules and set up working directory
+#### Load modules and set up working directory
 ```
 module load plink/2.0_alpha_1_final
 module load plink
@@ -12,7 +12,7 @@ cd /data/LNG/saraB/PRS_resilience/FINAL/
 ```
 
 ### 1. IPDGC data - 7204 are cases and 9412 are controls
-### Remove problematic regions from Chang 2017 summary stats + filter by MAF 0.01
+#### Remove problematic regions from Chang 2017 summary stats + filter by MAF 0.01
 ```
 MHC region (hg19): chr6:28477797-33448354
 plink --bfile HARDCALLS_PD_september_2018_no_cousins --keep noChangIDs.txt --make-bed --out noChangIDs_HARDCALLS_PD_september_2018_no_cousins
@@ -20,7 +20,7 @@ plink --bfile noChangIDs_HARDCALLS_PD_september_2018_no_cousins --remove-fam /da
 plink --bfile noChangIDs_noNeuroX_HARDCALLS_PD_september_2018_no_cousins --exclude range /data/LNG/saraB/PRS_resilience/MHC.txt --maf 0.01 --make-bed --out ALL_no_MHC_noNeurox
 ```
 
-### Format fam file to match cov file
+#### Format fam file to match cov file
 ```
 R
 library("data.table")
@@ -32,7 +32,7 @@ write.table(test2, file = "ALL_no_MHC_noNeurox.fam", quote = F, row.names = F, c
 ```
 
 ### GenoML to set up best threshold to define risk 
-### a) Munge datasets.
+#### a) Munge datasets.
 ```
 genoml discrete supervised munge --p 0.01 --prefix resilience_p1E2 --geno maf05_no_MHC --pheno pheno.csv --gwas gwas.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features snps.txt --confounders confounders.csv --adjust_data yes --adjust_normalize yes --umap_reduce no
 genoml discrete supervised munge --p 0.001 --prefix resilience_p1E3 --geno maf05_no_MHC --pheno pheno.csv --gwas gwas.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features snps.txt --confounders confounders.csv --adjust_data yes --adjust_normalize yes --umap_reduce no
@@ -43,7 +43,7 @@ genoml discrete supervised munge --p 0.0000001 --prefix resilience_p1E7 --geno m
 genoml discrete supervised munge --p 0.00000001 --prefix resilience_p1E8 --geno maf05_no_MHC --pheno pheno.csv --gwas gwas.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features snps.txt --confounders confounders.csv --adjust_data yes --adjust_normalize yes --umap_reduce no
 ```
 
-### b) Train datasets.
+#### b) Train datasets.
 ```
 genoml discrete supervised train --prefix risk_p1E2
 genoml discrete supervised train --prefix risk_p1E3
@@ -54,7 +54,7 @@ genoml discrete supervised train --prefix risk_p1E7
 genoml discrete supervised train --prefix risk_p1E8
 ```
 
-### Tune and cross-validate models.
+#### Tune and cross-validate models.
 ```
 genoml discrete supervised tune --prefix risk_p1E2 --max_tune 25
 genoml discrete supervised tune --prefix risk_p1E3 --max_tune 10 --n_cv 3
@@ -66,7 +66,7 @@ genoml discrete supervised tune --prefix risk_p1E8 --max_tune 25
 ```
 
 ### Polygenic risk score
-### a) Extract risk clumped SNPs considering the bin 1e-3 nominated by GenoML - (selecting the bin that accounts for the most variance and performs better)
+#### a) Extract risk clumped SNPs considering the bin 1e-3 nominated by GenoML - (selecting the bin that accounts for the most variance and performs better)
 ```
 sed 's/SNP/MarkerName/g' risk_p1E3.variants_and_alleles.tab > risk_p1E3.variants_and_alleles_rename.tab
 
@@ -81,12 +81,12 @@ outPut <- total[,c("MarkerName","Allele_final1","Effect")]
 write.table(outPut, file = "Chang_1e3.toscore.txt", quote = F, row.names = F, col.names = F, sep = "\t")
 ```
 
-### b) Calculate scores in plink
+#### b) Calculate scores in plink
 ```
 plink --bfile maf05_no_MHC --score Chang_1e3.toscore.txt --out Chang_1e3.Training
 ```
 
-### c) Convert plink scores into z-scores and divide our data in percentiles - The goal is to identify affected and unaffected individuals at the upper 25th percentile
+#### c) Convert plink scores into z-scores and divide our data in percentiles - The goal is to identify affected and unaffected individuals at the upper 25th percentile
 ```
 R
 library("tidyr")
@@ -143,7 +143,7 @@ summary(Model)
 # Number of Fisher Scoring iterations: 4
 ```
 
-### d) Make a density plot
+#### d) Make a density plot
 ```
 data$probDisease <- predict(Model, data, type = c("response"))
 data$predicted <- ifelse(data$probDisease > 0.5, "DISEASE", "CONTROL")
@@ -152,7 +152,7 @@ densPlot <- ggplot(data, aes(probDisease, fill = reported, color = reported)) + 
 ggsave(plot = densPlot, filename = "plotDensity.png", width = 10, height = 5, units = "in", dpi = 300)
 ```
 
-### e) Detect controls in the upper quantile of risk (25%) and based on those intervals we select cases with the same risk range
+#### e) Detect controls in the upper quantile of risk (25%) and based on those intervals we select cases with the same risk range
 ```
 R
 library("data.table")
@@ -170,23 +170,23 @@ training_data = subset(data, zSCORE >= decile_Z_controls & zSCORE <= max_Z_contr
 write.table(training_data, file = "Training_individuals_highriskquantile.txt", quote = F, row.names = F, sep = "\t")
 ```
 
-### f) Extract IPDGC individuals (cases/controls) in the upper quantile (25%) from plink binaries -  3011 are cases and 2353 are controls.
+#### f) Extract IPDGC individuals (cases/controls) in the upper quantile (25%) from plink binaries -  3011 are cases and 2353 are controls.
 ```
 plink --bfile /data/LNG/saraB/PRS_resilience/ALL_no_MHC_noNeurox --keep Training_individuals_highriskquantile.txt --make-bed --out Training_cases_controls_noNeuroX_highriskquantile
 ```
 
-### g) Exclude 90 PD hits + 1Mb upstream/downstream to avoid following analyses
+#### g) Exclude 90 PD hits + 1Mb upstream/downstream to avoid following analyses
 ```
 plink --bfile Training_cases_controls_noNeuroX_highriskquantile --exclude range /data/LNG/saraB/PRS_resilience/listofregions.txt --make-bed --out Training_cases_controls_highriskquantile_no_regions
 ```
 
-### h) Run a GWAS in the top 25% of risk, this will give you betas that are specific to the Training set. 
+#### h) Run a GWAS in the top 25% of risk, this will give you betas that are specific to the Training set. 
 ```
 module load plink/2.0_alpha_1_final
 plink2 --bfile Training_cases_controls_highriskquantile_no_regions --maf 0.05 --hwe 0.00001 --covar /data/LNG/saraB/WGS/noage_toPRSice_phenosAndCovs_renamed.tab --glm hide-covar --out training_resilience_GWAS 
 ```
 
-### i) Any hits? What's the lambda? Make a MH plot of pvalues per genomic region on the -log10 scale.
+#### i) Any hits? What's the lambda? Make a MH plot of pvalues per genomic region on the -log10 scale.
 ```
 conda activate basicML
 python
@@ -226,7 +226,7 @@ plot.fig.suptitle('Resilience Manhattan (plot)')
 plot.savefig("resilience_training_data_manhattan.png")
 ```
 
-### j) Train this model on GenoML - Split the data in 70-30% -> 70% to generate weights and 30% to fit the model
+#### j) Train this model on GenoML - Split the data in 70-30% -> 70% to generate weights and 30% to fit the model
 ```
 library(data.table)
 fam <- fread("Training_cases_controls_highriskquantile_no_regions.fam", header = F)
@@ -237,13 +237,13 @@ fam_subsetted1 <- subset(fam, random > 7)
 write.table(fam_subsetted1, "subsetted_Training_cases_controls_highriskquantile_no_regions.txt", quote = F, sep = "\t", row.names = F, col.names = F)
 ```
 ### Polygenic resilience
-### a) Extract 70% of the data - 2124 cases and 1632 controls remaining after main filters = 3756 samples
+#### a) Extract 70% of the data - 2124 cases and 1632 controls remaining after main filters = 3756 samples
 ```
 plink --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --make-bed --out SEVENTY_training_resilience_GWAS
 plink2 --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --maf 0.05 --hwe 0.00001 --covar /data/LNG/saraB/WGS/noage_toPRSice_phenosAndCovs_renamed.tab --glm hide-covar --out SEVENTY_training_resilience_GWAS 
 ```
 
-### b) GenoML - Munge datasets.
+#### b) GenoML - Munge datasets.
 ```
 genoml discrete supervised munge --p 0.01 --prefix resilience_p1E2_seventy --geno maf05_no_MHC_seventy --pheno pheno_seventy.csv --gwas gwas_seventy.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features ../snps.txt --addit confounders_seventy.csv
 genoml discrete supervised munge --p 0.001 --prefix resilience_p1E3_seventy --geno maf05_no_MHC_seventy --pheno pheno_seventy.csv --gwas gwas_seventy.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features ../snps.txt --addit confounders_seventy.csv
@@ -254,7 +254,7 @@ genoml discrete supervised munge --p 0.0000001 --prefix resilience_p1E7_seventy 
 genoml discrete supervised munge --p 0.00000001 --prefix resilience_p1E8_seventy --geno maf05_no_MHC_seventy --pheno pheno_seventy.csv --gwas gwas_seventy.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features ../snps.txt --addit confounders_seventy.csv
 ```
 
-### c) Train datasets.
+#### c) Train datasets.
 ```
 genoml discrete supervised train --prefix resilience_p1E2_seventy
 genoml discrete supervised train --prefix resilience_p1E3_seventy
@@ -265,7 +265,7 @@ genoml discrete supervised train --prefix resilience_p1E7_seventy
 genoml discrete supervised train --prefix resilience_p1E8_seventy
 ```
 
-### d) Tune and cross-validate models.
+#### d) Tune and cross-validate models.
 ```
 genoml discrete supervised tune --prefix resilience_p1E2_seventy --max_tune 25
 genoml discrete supervised tune --prefix resilience_p1E3_seventy --max_tune 25
@@ -276,7 +276,7 @@ genoml discrete supervised tune --prefix resilience_p1E7_seventy --max_tune 25
 genoml discrete supervised tune --prefix resilience_p1E8_seventy --max_tune 25
 ```
 
-### e) Run Polygenic Resilience Score in 30% of data using p-value threshold 1e-3 obtained in 70 % of the data (best performance in last model)
+#### e) Run Polygenic Resilience Score in 30% of data using p-value threshold 1e-3 obtained in 70 % of the data (best performance in last model)
 ```
 awk '{print $3, $6, $9}' SEVENTY_training_resilience_GWAS.PHENO1.glm.logistic > temp
 ```
@@ -348,7 +348,7 @@ res.summary()
 # ==============================================================================
 ```
 
-### f) Violin plot
+#### f) Violin plot
 ```
 R
 library(ggplot2)
@@ -370,13 +370,13 @@ ggsave("resilience_IPDGC.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 ### 2. UKBB data - 2639 are cases and 14301 are controls
 
-### Format cov file 
+#### Format cov file 
 ```
 Cov file -> /data/CARD/UKBIOBANK/PHENOTYPE_DATA/disease_groups/UKB_GENO_PD_CASE_CONTROL_with_PC.txt
 awk '{print $1, $2}' /data/CARD/UKBIOBANK/PHENOTYPE_DATA/disease_groups/UKB_GENO_PD_CASE_CONTROL_with_PC.txt > indvs_to_keep.txt
 ```
 
-### Extract clumped SNPs from Phase I (RISK)
+#### Extract clumped SNPs from Phase I (RISK)
 ```
 sed 's/:/ /g' resilience_p1E3.variants_and_alleles_rename.tab  > SNPS_risk_p1E3.variants_and_alleles_rename.tab
 awk '{print $1, $2, $2, $3}' SNPS_risk_p1E3.variants_and_alleles_rename.tab > SNPS_risk_p1E3.variants_and_alleles_rename_extracted.tab
@@ -388,12 +388,12 @@ echo "THIS IS LINE" $LINE
 plink2 --pfile /data/CARD/UKBIOBANK/FILTER_IMPUTED_DATA/chr$LINE.UKBB.EU.filtered --extract range /data/LNG/saraB/PRS_resilience/ML/SNPS_risk_p1E3.variants_and_alleles_rename_extracted.tab --keep indvs_to_keep.txt --make-bed --out  /data/LNG/saraB/PRS_resilience/FINAL/Testing.UKBB.clumped.chr$LINE
 done
 ```
-### Merge data
+#### Merge data
 ```
 plink --bfile Testing.UKBB.clumped.chr1 --merge-list list.txt --make-bed --out Testing.UKBB.clumped_ALL
 ```
 
-### Update pheno 
+#### Update pheno 
 ```
 ## 2639 are cases and 14301 are controls - European ancestry + unrelated
 plink --bfile Testing.UKBB.clumped_ALL --pheno pheno_UKBB_V2.txt --out Testing.UKBB.clumped_ALL_updated --make-bed
@@ -402,7 +402,7 @@ mv temp Testing.UKBB.clumped_ALL_updated.fam
 ```
 
 ### Polygenic risk score
-### a) Format bim file and calculate risk score using "Chang_1e3.toscore.txt" estimates.
+#### a) Format bim file and calculate risk score using "Chang_1e3.toscore.txt" estimates.
 ```  
 library(data.table)
 bim <- fread("Testing.UKBB.clumped_ALL_updated.bim", header =F)
@@ -424,7 +424,7 @@ cp Testing.UKBB.clumped_ALL_updated.bed FINAL_Testing.UKBB.clumped_ALL_updated.b
 plink --bfile FINAL_Testing.UKBB.clumped_ALL_updated --score Chang_1e3.toscore.txt --out PRS_risk_threshold_3e1.snps.Testing.UKBB
 ```
 
-### b) Convert plink scores into z-scores and divide data in percentiles - The goal is to identify affected and unaffected individuals at the upper 25th percentile. Compare ZSCORE in cases and controls by running glm
+#### b) Convert plink scores into z-scores and divide data in percentiles - The goal is to identify affected and unaffected individuals at the upper 25th percentile. Compare ZSCORE in cases and controls by running glm
 ```
 R
 library("tidyr")
@@ -460,7 +460,7 @@ summary(Model)
 # PC10            0.217127   1.430843   0.152   0.8794    
 ```
 
-### c) Make density plot
+#### c) Make density plot
 ```
 data$probDisease <- predict(Model, data, type = c("response"))
 data$predicted <- ifelse(data$probDisease > 0.5, "DISEASE", "CONTROL")
@@ -469,7 +469,7 @@ densPlot <- ggplot(data, aes(probDisease, fill = reported, color = reported)) + 
 ggsave(plot = densPlot, filename = "plotDensity_UKBB.png", width = 10, height = 5, units = "in", dpi = 300)
 ```
 
-### d) Detect controls in the upper quantile of risk (25%) and based on those intervals we select cases with the same risk range
+#### d) Detect controls in the upper quantile of risk (25%) and based on those intervals we select cases with the same risk range
 ```
 R
 library("data.table")
@@ -487,13 +487,13 @@ training_data = subset(data, zSCORE >= decile_Z_controls & zSCORE <= max_Z_contr
 write.table(training_data, file = "Testing_UKBB_individuals_highriskquantile.txt", quote = F, row.names = F, sep = "\t")
 ```
 
-### e) Extract individuals (cases/controls) in the in the upper quantile (25%) from plink binaries
+#### e) Extract individuals (cases/controls) in the in the upper quantile (25%) from plink binaries
 ```
 ## 847 are cases and 3576 are controls.
 plink --bfile Testing.UKBB.clumped_ALL_updated --keep Testing_UKBB_individuals_highriskquantile.txt --make-bed --out Testing_UKBB_cases_controls_highriskquantile
 ```
 
-### f) Run a GWAS in this dataset of top 25% of risk, which will give us betas that are specific to the UKBB set 
+#### f) Run a GWAS in this dataset of top 25% of risk, which will give us betas that are specific to the UKBB set 
 ```
 awk '{print $1, $2, $2, $5}' training_resilience_GWAS.PHENO1.glm.logistic > SNPS_training_resilience_GWAS.PHENO1.glm.logistic
 awk '{print $1, $2}' Testing_UKBB_individuals_highriskquantile.txt > extracted_subsetted_controls_and_cases_Testing_UKBB_cases_controls_highriskquantile.txt
@@ -506,16 +506,16 @@ plink2 --pfile /data/CARD/UKBIOBANK/FILTER_IMPUTED_DATA/chr$LINE.UKBB.EU.filtere
 done
 ```
 
-### g) Merge data + update pheno
+#### g) Merge data + update pheno
 ```
 plink --bfile subsetted_Testing.UKBB.resilience_GWAS.chr1 --merge-list list2.txt --pheno pheno_UKBB_V2.txt --snps-only --make-bed --out Testing.UKBB.resilience_GWAS_subset
 ```
-### h) Run GWAS removing list of regions
+#### h) Run GWAS removing list of regions
 ```
 plink2 --bfile Testing.UKBB.resilience_GWAS_subset --maf 0.05 --hwe 0.00001 --exclude range /data/LNG/saraB/PRS_resilience/listofregions.txt --covar /data/CARD/UKBIOBANK/PROJECTS/drug_mine_2020/covariates_phenome_final.txt --covar-name AGE_OF_RECRUIT,BATCH,GENETIC_SEX,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,PC9,PC10,PC11,PC12,PC13,PC14,PC15,PC16,PC17,PC18,PC19,PC20 --glm hide-covar --out Testing_UKBB_resilience_GWAS_subset
 ```
 
-### i) Any hits on UKB dataset? What's the lambda? Make a MH plot of pvalues per genomic region on the -log10 scale.
+#### i) Any hits on UKB dataset? What's the lambda? Make a MH plot of pvalues per genomic region on the -log10 scale.
 ```
 conda activate basicML
 python
@@ -556,7 +556,7 @@ lambda <- median(x2obs)/median(x2exp)
 ```
 
 ### Polygenic resilience
-### a) Run Polygenic Resilience Score in 30% of data using p-value threshold 1e-3 obtained in 70 % of the data (best performance in last model)
+#### a) Run Polygenic Resilience Score in 30% of data using p-value threshold 1e-3 obtained in 70 % of the data (best performance in last model)
 ```
 library(data.table)
 bim <- fread("Testing.UKBB.resilience_GWAS_subset.bim", header = F)
@@ -631,7 +631,7 @@ res.summary()
 # ==================================================================================
 ```
 
-### b) Violin plot
+#### b) Violin plot
 ```
 R
 library(ggplot2)
@@ -686,7 +686,7 @@ ggsave("resilience_UKB.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 ### 3. AMP_PD data - version 2.5 - 2248 are cases and 2817 are controls
 
-### Format cov file
+#### Format cov file
 ```
 binary files-> /data/CARD/PD/AMP-PD/Plink/2021_v2_5release/rsID_pfiles_fromAMP/all_chrs_merged_maf_1e-3_rsIDs_callrate_sex_ancestry_EUR_related_het
 cov file -> /data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt
@@ -694,13 +694,13 @@ awk '{print $1, $2}'/data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samples
 awk '{print $1, $2, $10}'/data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt > pheno_ampv2.5.txt
 ```
 
-### Keep the right individuals and update pheno
+#### Keep the right individuals and update pheno
 ```
 plink --bfile /data/CARD/PD/AMP-PD/Plink/2021_v2_5release/rsID_pfiles_fromAMP/all_chrs_merged_maf_1e-3_rsIDs_callrate_sex_ancestry_EUR_related_het --keep tokeep.txt --make-bed --out AMP_PD_v2_clean_unrelated_eur
 plink --bfile AMP_PD_v2_clean_unrelated_eur --pheno pheno_ampv2.5.txt --make-bed --out updated_AMP_PD_v2_clean_unrelated_eur
 ```
 
-### Reformat score file to run PRS (AMP-PD is on hg38)
+#### Reformat score file to run PRS (AMP-PD is on hg38)
 ```
 sed 's/:/_/g' Chang_1e3.toscore.txt > temp_Chang_1e3.toscore.txt
 ```
@@ -721,20 +721,20 @@ write.table(outPut, file = "AMP_formatted_PRS_risk_threshold_1e3.snps.toscore.tx
 ```
 awk '{print $1}' AMP_formatted_PRS_risk_threshold_1e3.snps.toscore.txt > SNPs_Chang2017_1e3.txt
 ```
-### Extract SNPs of interest to run PRS at 1E-3
+#### Extract SNPs of interest to run PRS at 1E-3
 ```
 988 variants remaining
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --extract SNPs_Chang2017_1e3.txt  --make-bed --out Testing.AMP_PD.clumped.ALL
 ```
 
 ### Polygenic risk score
-### a) Calculate score using estimates from Chang2017
+#### a) Calculate score using estimates from Chang2017
 ```
 988 valid predictors loaded.
 plink --bfile Testing.AMP_PD.clumped.ALL --score AMP_formatted_PRS_risk_threshold_1e3.snps.toscore.txt --out PRS_risk_threshold_3e1.snps.Testing.AMP_PD
 ```
 
-### b) Convert plink scores into z-scores and divide our data in percentiles - The goal is to identify affected and unaffected individuals at the upper 25th percentile. Here we compare ZSCORE in cases and controls by running glm
+#### b) Convert plink scores into z-scores and divide our data in percentiles - The goal is to identify affected and unaffected individuals at the upper 25th percentile. Here we compare ZSCORE in cases and controls by running glm
 ```
 R
 library("tidyr")
@@ -786,7 +786,7 @@ summary(Model)
 # Number of Fisher Scoring iterations: 4
 ```
 
-### c) Make a density plot
+#### c) Make a density plot
 ```
 data$probDisease <- predict(Model, data, type = c("response"))
 data$predicted <- ifelse(data$probDisease > 0.5, "DISEASE", "CONTROL")
@@ -795,7 +795,7 @@ densPlot <- ggplot(data, aes(probDisease, fill = reported, color = reported)) + 
 ggsave(plot = densPlot, filename = "plotDensity_AMP_PD.png", width = 10, height = 5, units = "in", dpi = 300)
 ```
 
-### d) Detect controls in the upper quantile of risk (25%) and based on those intervals we select cases with the same risk range
+#### d) Detect controls in the upper quantile of risk (25%) and based on those intervals we select cases with the same risk range
 ```
 R
 library("data.table")
@@ -811,7 +811,7 @@ training_data = subset(data, zSCORE >= decile_Z_controls & zSCORE <= max_Z_contr
 write.table(training_data, file = "Testing_AMP_PD_individuals_highriskquantile.txt", quote = F, row.names = F, sep = "\t")
 ```
 
-### e) Prep to extract GWAS vars from training to speed up analysis
+#### e) Prep to extract GWAS vars from training to speed up analysis
 ```
 awk '{print $3}' training_resilience_GWAS.PHENO1.glm.logistic > temp
 sed 's/:/_/g' temp > vars_GWAS_training.txt
@@ -834,18 +834,18 @@ write.table(outPut, file = "GWAS_vars_toextract.txt", quote = F, row.names = F, 
 awk '{print $1}' GWAS_vars_toextract.txt > SNPS_GWAS_vars_toextract.txt
 ```
 
-### f) Extract individuals (cases/controls) in the in the upper quantile (25%) from plink binaries 
+#### f) Extract individuals (cases/controls) in the in the upper quantile (25%) from plink binaries 
 ```
 ## 798 are cases and 705 are controls
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --keep Testing_AMP_PD_individuals_highriskquantile.txt --extract SNPS_GWAS_vars_toextract.txt --make-bed --out Testing.AMP_PD.toGWAS
 ```
 
-### g) Run a GWAS
+#### g) Run a GWAS
 ```
 plink2 --bfile Testing.AMP_PD.toGWAS --maf 0.05 --hwe 0.00001 --covar /data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt --covar-name SEX,PC1,PC2,PC3,PC4,PC5 --glm hide-covar --out Testing_AMP_PD_resilience_GWAS_subset
 ```
 
-### h) Any hits on AMP-PD dataset? What's the lambda? Make a MH plot of pvalues per genomic region on the -log10 scale.
+#### h) Any hits on AMP-PD dataset? What's the lambda? Make a MH plot of pvalues per genomic region on the -log10 scale.
 ```
 conda activate basicML
 python
@@ -889,7 +889,7 @@ lambda -> ###[[1] 1.011361
 ```
 
 ### Polygenic resilience score
-### a) Reformat resilience weights to rsIDs (AMP-PD is in hg38)
+#### a) Reformat resilience weights to rsIDs (AMP-PD is in hg38)
 ```
 sed 's/:/_/g' SEVENTY_IPDGC_toscore_1e3.txt > temp_SEVENTY_IPDGC_toscore_1e3.txt
 ```
@@ -906,7 +906,7 @@ outPut <- data2[,c("SNP","A1","BETA")]
 write.table(outPut, file = "AMP_formatted_PRS_resilience.snps.toscore.txt", quote = F, row.names = F, col.names = F, sep = "\t")
 ```
 
-### b) Run resilience profile 
+#### b) Run resilience profile 
 ```
 ## 798 are cases and 705 are controls, 794 valid predictors loaded.
 plink --bfile Testing.AMP_PD.toGWAS --score AMP_formatted_PRS_resilience.snps.toscore.txt --out AMP_PD_resilience
@@ -964,7 +964,7 @@ res.summary()
 # IPDGC	value	value	value
 ```
 
-### c) Violin plot
+#### c) Violin plot
 ```
 R
 library(ggplot2)
@@ -983,7 +983,7 @@ ggsave("resilience_AMP_PD.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 ```
 ## TO PEARSON CORRELATIONS
-### IPDGC 
+#### IPDGC 
 ```
 ## 7204 are cases and 9412 are controls. 1060 valid predictors loaded.
 plink --bfile /data/LNG/saraB/PRS_resilience/ALL_no_MHC_noNeurox --maf 0.05 --geno 0.01 --score /data/LNG/saraB/PRS_resilience/ML/Chang_1e3.toscore.txt --out ALL_IPDGC_RISK
@@ -992,7 +992,7 @@ plink --bfile /data/LNG/saraB/PRS_resilience/ALL_no_MHC_noNeurox --maf 0.05 --ge
 plink --bfile /data/LNG/saraB/PRS_resilience/ALL_no_MHC_noNeurox --maf 0.05 --geno 0.01 --score /data/LNG/saraB/PRS_resilience/ML/SEVENTY_IPDGC_toscore_1e3.txt --out ALL_IPDGC_RESILIENCE
 ```
 
-### UKBB
+#### UKBB
 ```
 ## 2639 are cases and 14301 are controls.1030 valid predictors loaded.
 plink --bfile FINAL_Testing.UKBB.clumped_ALL_updated --score Chang_1e3.toscore.txt --out ALL_UKBB_RISK
@@ -1011,7 +1011,7 @@ cp Testing.UKBB.resilience_GWAS_subset_REFORMATTED.bim Testing.UKBB.resilience_G
 plink --bfile Testing.UKBB.resilience_GWAS_ALL --score /data/LNG/saraB/PRS_resilience/ML/SEVENTY_IPDGC_toscore_1e3.txt --out ALL_UKBB_RISK
 ```
 
-### AMP-PD
+#### AMP-PD
 ```
 ## 2248 are cases and 2817 are controls. 977 valid predictors loaded
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --score AMP_formatted_PRS_risk_threshold_1e3.snps.toscore.txt --out ALL_AMP_PD_RISK
@@ -1020,7 +1020,7 @@ plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --sco
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --score AMP_formatted_PRS_resilience.snps.toscore.txt --out ALL_AMP_PD_RESILIENCE
 ```
 
-### META for all cohorts
+#### META for all cohorts
 ```
 R
 install.packages("rmeta")
