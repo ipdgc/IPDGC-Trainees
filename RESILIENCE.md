@@ -1,6 +1,8 @@
 # The genetic architecture of resilience in Parkinson's disease
 
-## Load modules and set up working directory
+Sara Bandres-Ciga, Hui Liu,Mohammad Dehestani,
+
+### Load modules and set up working directory
 ```
 module load plink/2.0_alpha_1_final
 module load plink
@@ -9,7 +11,8 @@ module load R
 cd /data/LNG/saraB/PRS_resilience/FINAL/
 ```
 
-## IPDGC data (Training phase data from Bandres-Ciga 2020) - Remove problematic regions from Chang 2017 summary stats + filter by MAF 0.01
+### IPDGC data - 7204 are cases and 9412 are controls
+### Remove problematic regions from Chang 2017 summary stats + filter by MAF 0.01
 ```
 MHC region (hg19): chr6:28477797-33448354
 plink --bfile HARDCALLS_PD_september_2018_no_cousins --keep noChangIDs.txt --make-bed --out noChangIDs_HARDCALLS_PD_september_2018_no_cousins
@@ -17,7 +20,7 @@ plink --bfile noChangIDs_HARDCALLS_PD_september_2018_no_cousins --remove-fam /da
 plink --bfile noChangIDs_noNeuroX_HARDCALLS_PD_september_2018_no_cousins --exclude range /data/LNG/saraB/PRS_resilience/MHC.txt --maf 0.01 --make-bed --out ALL_no_MHC_noNeurox
 ```
 
-## Format fam file to match cov file
+### Format fam file to match cov file
 ```
 R
 library("data.table")
@@ -28,7 +31,7 @@ test2 <- test[,c("ID","ID","MAT", "PAT", "SEX", "PHENO")]
 write.table(test2, file = "ALL_no_MHC_noNeurox.fam", quote = F, row.names = F, col.names = F, sep = "\t")
 ```
 
-## GenoML to set up best threshold to define risk 
+### GenoML to set up best threshold to define risk 
 ### a) Munge datasets.
 ```
 genoml discrete supervised munge --p 0.01 --prefix resilience_p1E2 --geno maf05_no_MHC --pheno pheno.csv --gwas gwas.csv --impute mean --skip_prune no --r2_cutoff 0.1 --feature_selection 500 --target_features snps.txt --confounders confounders.csv --adjust_data yes --adjust_normalize yes --umap_reduce no
@@ -62,7 +65,7 @@ genoml discrete supervised tune --prefix risk_p1E7 --max_tune 25
 genoml discrete supervised tune --prefix risk_p1E8 --max_tune 25
 ```
 
-## Polygenic risk score
+### Polygenic risk score
 ### a) Extract risk clumped SNPs considering the bin 1e-3 nominated by GenoML - (selecting the bin that accounts for the most variance and performs better)
 ```
 sed 's/SNP/MarkerName/g' risk_p1E3.variants_and_alleles.tab > risk_p1E3.variants_and_alleles_rename.tab
@@ -233,11 +236,11 @@ fam$random <- rep(1:10)
 fam_subsetted1 <- subset(fam, random > 7)
 write.table(fam_subsetted1, "subsetted_Training_cases_controls_highriskquantile_no_regions.txt", quote = F, sep = "\t", row.names = F, col.names = F)
 ```
-## Polygenic resilience
-### a) Extract 70% of the data
+### Polygenic resilience
+### a) Extract 70% of the data - 2124 cases and 1632 controls remaining after main filters = 3756 samples
 ```
 plink --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --make-bed --out SEVENTY_training_resilience_GWAS
-plink2 --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --maf 0.05 --hwe 0.00001 --covar /data/LNG/saraB/WGS/noage_toPRSice_phenosAndCovs_renamed.tab --glm hide-covar --out SEVENTY_training_resilience_GWAS ## 2124 cases and 1632 controls remaining after main filters = 3756 samples remaining.
+plink2 --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --maf 0.05 --hwe 0.00001 --covar /data/LNG/saraB/WGS/noage_toPRSice_phenosAndCovs_renamed.tab --glm hide-covar --out SEVENTY_training_resilience_GWAS 
 ```
 
 ### b) GenoML - Munge datasets.
@@ -363,17 +366,17 @@ p2 + scale_fill_manual(values=c("lightblue", "orange")) + theme_bw() + ylab("Res
 ggsave("resilience_IPDGC.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 ```
 
-################################################################################################################################################################################
+################################################################################################################################################################
 
-## UKBB data
+### UKBB data - 2639 are cases and 14301 are controls
 
-## Format cov file 
+### Format cov file 
 ```
 Cov file -> /data/CARD/UKBIOBANK/PHENOTYPE_DATA/disease_groups/UKB_GENO_PD_CASE_CONTROL_with_PC.txt
 awk '{print $1, $2}' /data/CARD/UKBIOBANK/PHENOTYPE_DATA/disease_groups/UKB_GENO_PD_CASE_CONTROL_with_PC.txt > indvs_to_keep.txt
 ```
 
-## Extract clumped SNPs from Phase I (RISK)
+### Extract clumped SNPs from Phase I (RISK)
 ```
 sed 's/:/ /g' resilience_p1E3.variants_and_alleles_rename.tab  > SNPS_risk_p1E3.variants_and_alleles_rename.tab
 awk '{print $1, $2, $2, $3}' SNPS_risk_p1E3.variants_and_alleles_rename.tab > SNPS_risk_p1E3.variants_and_alleles_rename_extracted.tab
@@ -385,12 +388,12 @@ echo "THIS IS LINE" $LINE
 plink2 --pfile /data/CARD/UKBIOBANK/FILTER_IMPUTED_DATA/chr$LINE.UKBB.EU.filtered --extract range /data/LNG/saraB/PRS_resilience/ML/SNPS_risk_p1E3.variants_and_alleles_rename_extracted.tab --keep indvs_to_keep.txt --make-bed --out  /data/LNG/saraB/PRS_resilience/FINAL/Testing.UKBB.clumped.chr$LINE
 done
 ```
-## Merge data
+### Merge data
 ```
 plink --bfile Testing.UKBB.clumped.chr1 --merge-list list.txt --make-bed --out Testing.UKBB.clumped_ALL
 ```
 
-## Update pheno 
+### Update pheno 
 ```
 ## 2639 are cases and 14301 are controls - European ancestry + unrelated
 plink --bfile Testing.UKBB.clumped_ALL --pheno pheno_UKBB_V2.txt --out Testing.UKBB.clumped_ALL_updated --make-bed
@@ -398,7 +401,7 @@ sed 's/-9/1/g' Testing.UKBB.clumped_ALL_updated.fam > temp
 mv temp Testing.UKBB.clumped_ALL_updated.fam 
 ```
 
-## Polygenic risk score
+### Polygenic risk score
 ### a) Format bim file and calculate risk score using "Chang_1e3.toscore.txt" estimates.
 ```  
 library(data.table)
@@ -552,7 +555,7 @@ lambda <- median(x2obs)/median(x2exp)
 ### lambda -> [1] 1.022911
 ```
 
-## Polygenic resilience
+### Polygenic resilience
 ### a) Run Polygenic Resilience Score in 30% of data using p-value threshold 1e-3 obtained in 70 % of the data (best performance in last model)
 ```
 library(data.table)
@@ -679,11 +682,11 @@ ggsave("resilience_UKB.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 # ==================================================================================
 ```
-################################################################################################################################################################################
+################################################################################################################################################################
 
-## AMP_PD data - version 2.5 - 2248 are cases and 2817 are controls
+### AMP_PD data - version 2.5 - 2248 are cases and 2817 are controls
 
-## Format cov file
+### Format cov file
 ```
 binary files-> /data/CARD/PD/AMP-PD/Plink/2021_v2_5release/rsID_pfiles_fromAMP/all_chrs_merged_maf_1e-3_rsIDs_callrate_sex_ancestry_EUR_related_het
 cov file -> /data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt
@@ -691,13 +694,13 @@ awk '{print $1, $2}'/data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samples
 awk '{print $1, $2, $10}'/data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt > pheno_ampv2.5.txt
 ```
 
-## Keep the right individuals and update pheno
+### Keep the right individuals and update pheno
 ```
 plink --bfile /data/CARD/PD/AMP-PD/Plink/2021_v2_5release/rsID_pfiles_fromAMP/all_chrs_merged_maf_1e-3_rsIDs_callrate_sex_ancestry_EUR_related_het --keep tokeep.txt --make-bed --out AMP_PD_v2_clean_unrelated_eur
 plink --bfile AMP_PD_v2_clean_unrelated_eur --pheno pheno_ampv2.5.txt --make-bed --out updated_AMP_PD_v2_clean_unrelated_eur
 ```
 
-## Reformat score file to run PRS (AMP-PD is on hg38)
+### Reformat score file to run PRS (AMP-PD is on hg38)
 ```
 sed 's/:/_/g' Chang_1e3.toscore.txt > temp_Chang_1e3.toscore.txt
 ```
@@ -718,13 +721,13 @@ write.table(outPut, file = "AMP_formatted_PRS_risk_threshold_1e3.snps.toscore.tx
 ```
 awk '{print $1}' AMP_formatted_PRS_risk_threshold_1e3.snps.toscore.txt > SNPs_Chang2017_1e3.txt
 ```
-## Extract SNPs of interest to run PRS at 1E-3
+### Extract SNPs of interest to run PRS at 1E-3
 ```
 988 variants remaining
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --extract SNPs_Chang2017_1e3.txt  --make-bed --out Testing.AMP_PD.clumped.ALL
 ```
 
-## Polygenic risk score
+### Polygenic risk score
 ### a) Calculate score using estimates from Chang2017
 ```
 988 valid predictors loaded.
@@ -885,7 +888,7 @@ lambda <- median(x2obs)/median(x2exp)
 lambda -> ###[[1] 1.011361
 ```
 
-## Polygenic resilience score
+### Polygenic resilience score
 ### a) Reformat resilience weights to rsIDs (AMP-PD is in hg38)
 ```
 sed 's/:/_/g' SEVENTY_IPDGC_toscore_1e3.txt > temp_SEVENTY_IPDGC_toscore_1e3.txt
