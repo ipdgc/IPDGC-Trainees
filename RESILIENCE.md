@@ -974,7 +974,7 @@ done
 plink --bfile Testing.UKBB.resilience_GWAS.1.ALLindvs --merge-list list_final.txt --pheno pheno_UKBB_V2.txt --snps-only --make-bed --out Testing.UKBB.resilience_GWAS_ALL
 cp Testing.UKBB.resilience_GWAS_subset_REFORMATTED.bim Testing.UKBB.resilience_GWAS_ALL.bim
 
-plink --bfile Testing.UKBB.resilience_GWAS_ALL --score /data/LNG/saraB/PRS_resilience/ML/SEVENTY_IPDGC_toscore_1e3.txt --out ALL_UKBB_RISK
+plink --bfile Testing.UKBB.resilience_GWAS_ALL --score /data/LNG/saraB/PRS_resilience/ML/SEVENTY_IPDGC_toscore_1e3.txt --out ALL_UKBB_RESILIENCE
 ```
 
 #### AMP-PD
