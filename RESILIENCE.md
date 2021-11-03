@@ -948,7 +948,7 @@ p2 + scale_fill_manual(values=c("yellow", "purple")) + theme_bw() + ylab("Resili
 ggsave("resilience_AMP_PD.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 ```
-## TO PEARSON CORRELATIONS
+### PEARSON correlations
 #### IPDGC 
 ```
 ## 7204 are cases and 9412 are controls. 1060 valid predictors loaded.
@@ -996,3 +996,388 @@ sumstats <- fread("summary.txt", header = T)
 met <- meta.summaries(d = sumstats$BETA, se = sumstats$SE, method = c("fixed"), logscale = F, names = sumstats$COHORT) # logscale option set for OR.
 met$test # gives you the Z and P for the meta-analysis.
 ```
+
+#############################################################################################################################
+
+#### META for all cohorts
+```
+R
+install.packages("rmeta")
+library(rmeta)
+library(data.table)
+sumstats <- fread("summary.txt", header = T)
+met <- meta.summaries(d = sumstats$BETA, se = sumstats$SE, method = c("fixed"), logscale = F, names = sumstats$COHORT) # logscale option set for OR.
+met$test # gives you the Z and P for the meta-analysis.
+```
+
+#############################################################################################################################
+
+#### Polygenic resilience score accounting for LRRK2 G2019S and GBA N370S status
+
+```
+## Identify LRRK2 G2019S and GBA N370S carriers
+library(data.table)
+fam <- fread("SOFTCALLS_PD_unfiltered_no_duplicates.fam", header =F)
+colnames(fam) <- c("FID", "IID", "a", "b", "c", "d")
+fam$conca <- paste(fam$FID, fam$IID, sep = "_")
+head(fam)
+fam_final <- fam[,c("conca","conca","a", "b", "c", "d")]
+write.table(fam_final, file = "concat_SOFTCALLS_PD_unfiltered_no_duplicates.fam", quote = F, row.names = F, col.names = F, sep = "\t")
+
+## IPDGC LRRK2 ## hg19
+plink --bfile /data/LNG/saraB/important_files/concat_SOFTCALLS_PD_unfiltered_no_duplicates --chr 12 --from-bp 40734202 --to-bp 40734202 --recode A --out LRRK2_IPDGC
+## IPDGC GBA - N370S carriers ## hg19
+plink --bfile /data/LNG/saraB/important_files/concat_SOFTCALLS_PD_unfiltered_no_duplicates --chr 1 --from-bp 155205634 --to-bp 155205634 --recode A --out GBA_IPDGC 
+
+## Generate cov file
+library(data.table)
+A <- fread("/data/LNG/saraB/important_files/phenosAndCovs_renamed.tab", header =T)
+B <- fread("/data/LNG/saraB/PRS_resilience/LRRK2_IPDGC.raw", header =T)
+total <- merge(A, B, by="FID")
+C <- fread("/data/LNG/saraB/PRS_resilience/GBA_IPDGC.raw", header =T)
+total_final <- merge(total, C, by="FID")
+head(total_final)
+write.table(total_final, file = "GBA_LRRK2_phenosAndCovs_renamed.tab", quote = F, row.names = F, sep = "\t")
+
+## UKBB LRRK2 ## hg19
+plink --bfile /data/CARD/UKBIOBANK/IMPUTED_DATA/LRRK2_area_v2 --chr 12 --from-bp 40734202 --to-bp 40734202 --recode A --out LRRK2_UKBB_indvs 
+## UKBB GBA - N370S carriers ## hg19 - NO VARS FOUND!
+plink --bfile /data/CARD/UKBIOBANK/IMPUTED_DATA/GBAv2 --chr 1 --from-bp 155205634 --to-bp 155205634 --recode A --out GBA_UKBB_indvs 
+
+## Generate cov file
+library(data.table)
+A <- fread("/data/CARD/UKBIOBANK/PROJECTS/drug_mine_2020/covariates_phenome_final.txt", header =T)
+B <- fread("/data/LNG/saraB/PRS_resilience/LRRK2_UKBB_indvs.raw", header =T)
+total <- merge(A, B, by="FID")
+head(total)
+write.table(total, file = "LRRK2_covariates_phenome_final.txt", quote = F, row.names = F, sep = "\t")
+
+## AMP-PD ## hg38
+plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --chr 12 --from-bp 40340400 --to-bp 40340400 --recode A --out LRRK2_AMP_highriskquantile 
+## AMP-PD GBA - N370S carriers ## hg38
+plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --chr 1 --from-bp 155235843  --to-bp 155235843  --recode A --out GBA_AMP_highriskquantile 
+
+library(data.table)
+A <- fread("/data/CARD/PD/AMP_NIH/no_relateds/COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt", header =T)
+B <- fread("/data/LNG/saraB/PRS_resilience/FINAL/LRRK2_AMP_highriskquantile.raw", header =T)
+total <- merge(A, B, by="FID")
+C <- fread("/data/LNG/saraB/PRS_resilience/FINAL/GBA_AMP_highriskquantile.raw", header =T)
+total_final <- merge(total, C, by="FID")
+head(total_final)
+write.table(total_final, file = "GBA_LRRK2_AMPv2.5.tab", quote = F, row.names = F, sep = "\t")
+
+#### COURAGE-PD ## hg19
+## COURAGE - PD LRRK2 - G2019S carriers ## hg19
+plink --bfile COURAGE_EU --chr 12 --from-bp 40734202 --to-bp 40734202 --recode A --out LRRK2_GBA/LRRK2_COURAGE
+## COURAGE - PD - N370S carriers ## hg19
+plink --bfile COURAGE_EU --chr 1 --from-bp 155205634 --to-bp 155205634 --recode A --out LRRK2_GBA/GBA_COURAGE
+
+## Generate cov file
+A <- fread("euCOURAGE_COV", header =T)
+B <- fread("LRRK2_COURAGE.raw", header =T)
+total <- merge(A, B, by="FID")
+C <- fread("GBA_COURAGE.raw", header =T)
+total_final <- merge(total, C, by="FID")
+colnames(total_final)[21] <- "rs34637584_A"
+colnames(total_final)[27] <- "rs76763715_C"
+colnames(total_final)[4] <- "IID.X1"
+colnames(total_final)[25] <- "SEX.x"
+write.table(total_final, file = "GBA_LRRK2_COURAGE_Covs.tab", quote = F, row.names = F, sep = "\t")
+
+## Incorporate LRRK2 G2019S status in the polygenic resilience model as a covariate 
+
+## IPDGC
+python
+import pandas as pd
+import statsmodels.api as sm
+prs_df = pd.read_csv("IPDGC_resilience_THIRTY.profile", delim_whitespace=True)
+prs_df.head()
+prs_reduced_df = prs_df[['IID','SCORE','PHENO']]
+prs_reduced_mean = prs_reduced_df['SCORE'].mean()
+prs_reduced_std = prs_reduced_df['SCORE'].std()
+prs_reduced_df.rename(columns={'SCORE':'PRS'}, inplace=True)
+prs_reduced_df['PRS_Z'] = (prs_reduced_df['PRS'] - prs_reduced_mean)/prs_reduced_std
+cov_df = pd.read_csv("GBA_LRRK2_phenosAndCovs_renamed.tab", delim_whitespace=True)
+analysis_df = prs_reduced_df.merge(cov_df, on='IID', how='inner')
+analysis_df['TEST'] = analysis_df['PHENO'] - 1
+this_formula = "TEST ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + sex + rs34637584_A"
+res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
+res.summary()
+
+## UKBB
+python
+import pandas as pd
+import statsmodels.api as sm
+prs_df = pd.read_csv("UKBB_resilience.profile", delim_whitespace=True)
+prs_df.head()
+prs_reduced_df = prs_df[['IID','SCORE']]
+prs_reduced_mean = prs_reduced_df['SCORE'].mean()
+prs_reduced_std = prs_reduced_df['SCORE'].std()
+prs_reduced_df.rename(columns={'SCORE':'PRS'}, inplace=True)
+prs_reduced_df['PRS_Z'] = (prs_reduced_df['PRS'] - prs_reduced_mean)/prs_reduced_std
+pheno_df = pd.read_csv("/data/LNG/saraB/PRS_resilience/pheno.ukbb.txt", delim_whitespace=True, names=['FID','IID','DUECES'])
+pheno_reduced_df = pheno_df[['IID']]
+pheno_reduced_df['PHENO'] = 1
+cov_df = pd.read_csv("LRRK2_covariates_phenome_final.txt", delim_whitespace=True)
+temp_df = prs_reduced_df.merge(pheno_reduced_df, on='IID', how='left')
+temp_df['PHENO'].fillna(0, inplace=True)
+analysis_df = temp_df.merge(cov_df, on='IID', how='inner')
+this_formula = "PHENO ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + AGE_OF_RECRUIT + TOWNSEND + GENETIC_SEX + rs34637584_A"
+res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
+res.summary()
+
+## AMP-PD
+python
+import pandas as pd
+import statsmodels.api as sm
+prs_df = pd.read_csv("AMP_PD_resilience.profile", delim_whitespace=True)
+prs_df.head()
+prs_reduced_df = prs_df[['IID','SCORE']]
+prs_reduced_mean = prs_reduced_df['SCORE'].mean()
+prs_reduced_std = prs_reduced_df['SCORE'].std()
+prs_reduced_df.rename(columns={'SCORE':'PRS'}, inplace=True)
+prs_reduced_df['PRS_Z'] = (prs_reduced_df['PRS'] - prs_reduced_mean)/prs_reduced_std
+cov_df = pd.read_csv("GBA_LRRK2_AMPv2.5.tab", delim_whitespace=True)
+pheno_df = pd.read_csv("pheno_ampv2.5.txt", delim_whitespace=True, header=None, names=['FID','IID','PHENO'])
+temp_df = cov_df.merge(pheno_df, on='IID', how='inner')
+analysis_df = prs_reduced_df.merge(temp_df, on='IID', how='left')
+analysis_df['TEST'] = analysis_df['PHENO'] - 1
+this_formula = "TEST ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + SEX + rs34637584_A"
+res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
+res.summary()
+
+## COURAGE - PD
+temp_data <- fread("COURAGE_resilience_flipped.profile")
+temp_covs <- fread("GBA_LRRK2_COURAGE_Covs.tab")
+data <- merge(temp_data, temp_covs, by = c("FID"="FID"))
+data$CASE <- data$PHENO.y - 1
+meanSCORE <- mean(data$SCORE)
+sdSCORE <- sd(data$SCORE)
+data$zSCORE <- (data$SCORE - meanSCORE)/sdSCORE
+Model_LRRK2 <- glm(CASE ~ zSCORE + AGE+ SEX + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + rs34637584_A, data = data, family = 'binomial')
+summary(Model_LRRK2)
+
+## Incorporate GBA - N370S status in the polygenic resilience model as a covariate 
+
+## IPDGC
+python
+import pandas as pd
+import statsmodels.api as sm
+prs_df = pd.read_csv("IPDGC_resilience_THIRTY.profile", delim_whitespace=True)
+prs_df.head()
+prs_reduced_df = prs_df[['IID','SCORE','PHENO']]
+prs_reduced_mean = prs_reduced_df['SCORE'].mean()
+prs_reduced_std = prs_reduced_df['SCORE'].std()
+prs_reduced_df.rename(columns={'SCORE':'PRS'}, inplace=True)
+prs_reduced_df['PRS_Z'] = (prs_reduced_df['PRS'] - prs_reduced_mean)/prs_reduced_std
+cov_df = pd.read_csv("/data/LNG/saraB/WGS/toPRSice_phenosAndCovs_renamed.tab", delim_whitespace=True)
+analysis_df = prs_reduced_df.merge(cov_df, on='IID', how='inner')
+analysis_df['TEST'] = analysis_df['PHENO'] - 1
+this_formula = "TEST ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + sex + rs76763715_C"
+res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
+res.summary()
+
+## AMP-PD
+python
+import pandas as pd
+import statsmodels.api as sm
+prs_df = pd.read_csv("AMP_PD_resilience.profile", delim_whitespace=True)
+prs_df.head()
+prs_reduced_df = prs_df[['IID','SCORE']]
+prs_reduced_mean = prs_reduced_df['SCORE'].mean()
+prs_reduced_std = prs_reduced_df['SCORE'].std()
+prs_reduced_df.rename(columns={'SCORE':'PRS'}, inplace=True)
+prs_reduced_df['PRS_Z'] = (prs_reduced_df['PRS'] - prs_reduced_mean)/prs_reduced_std
+cov_df = pd.read_csv("COV_PD_NIH_AMPv2.5_samplestoKeep_EuroOnly_noDups_noNIHDups_wPheno_wSex_no_cousins.txt", delim_whitespace=True)
+pheno_df = pd.read_csv("pheno_ampv2.5.txt", delim_whitespace=True, header=None, names=['FID','IID','PHENO'])
+temp_df = cov_df.merge(pheno_df, on='IID', how='inner')
+analysis_df = prs_reduced_df.merge(temp_df, on='IID', how='left')
+analysis_df['TEST'] = analysis_df['PHENO'] - 1
+this_formula = "TEST ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + SEX + rs76763715_C"
+res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
+res.summary()
+
+## COURAGE - PD
+temp_data <- fread("COURAGE_resilience_flipped.profile")
+temp_covs <- fread("GBA_LRRK2_COURAGE_Covs.tab")
+data <- merge(temp_data, temp_covs, by = c("FID"="FID"))
+data$CASE <- data$PHENO.y - 1
+meanSCORE <- mean(data$SCORE)
+sdSCORE <- sd(data$SCORE)
+data$zSCORE <- (data$SCORE - meanSCORE)/sdSCORE
+Model_GBA <- glm(CASE ~ zSCORE + AGE + SEX + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + rs76763715_C, data = data, family = 'binomial')
+summary(Model_GBA)
+
+```
+#############################################################################################################################
+
+#### Heritability analyses through LDSC
+
+```
+## Reformat summary statistics for LDSC
+library("data.table")
+library("dplyr")
+library("tidyr")
+library("plyr")
+PD <- fread("Meta_GWAS_4cohorts_LD", header = T)
+TEMP <- fread("test_chrPosRs.tab", header = F) 
+colnames(TEMP) <- c("SNP", "snpid")
+merged <- merge(TEMP, PD, by="SNP")
+merged$OR <- as.numeric(merged$OR)
+merged$BETA <- log(merged$OR)
+merged$SE_fixed_qnorm<-abs(log(merged$OR)/qnorm(merged$P/2))
+merged$Zscore <- merged$BETA/merged$SE_fixed_qnorm
+merged$P.value <- merged$P
+merged$N <- 16292
+outPut <- merged[,c("snpid","A1","A2","Zscore", "N", "P.value")]
+outPut2 <- subset(outPut, snpid != "<NA>")
+write.table(outPut2, file = "PD_Resilience_toLDhub.txt", quote = F, row.names = F, sep = "\t")
+
+## Copy to biowulf
+scp /Users/bandrescigas/Desktop/PD_Resilience_toLDhub.txt bandrescigas@biowulf2.nih.gov:/data/LNG/saraB/
+
+## Run LDSC package to calculate heritability
+munge_sumstats.py --out Resilience_all_LDSC --sumstats /data/LNG/saraB/PD_Resilience_toLDhub.txt.gz \
+--merge-alleles /data/LNG/saraB/1kg_eur/eur_w_ld_chr/w_hm3.snplist \
+--snp snpid --a1 A1 --a2 A2 --p P.value 
+
+ldsc.py \
+--h2 /data/LNG/saraB/PD_Resilience_toLDhub.txt.gz \
+--ref-ld-chr /data/LNG/saraB/1kg_eur/eur_w_ld_chr/ \
+--w-ld-chr /data/LNG/saraB/1kg_eur/eur_w_ld_chr/ \
+--out Resilience_all_LDSC
+less Resilience_all_LDSC.log 
+
+```
+
+#############################################################################################################################
+
+#### Data visualization - Functional Enrichment
+
+```
+module load R/4.0
+R --vanilla --no-save
+library(data.table)
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(grid)
+
+## enrichment is calculated by this formula -> (intersection_size/term_size)*100
+data <- fread("gProfiler_hsapiens_intersections.csv",header=T)
+data$newOrder <- seq(1:30)
+data$source <- factor(data$source, levels=c("GO:BP","GO:CC","GO:MF"))
+
+bs=seq(1,4,0.5)
+
+p1 = ggplot(data[data$source == "GO:BP"],) +
+    geom_point(aes(x = enrichment,y = reorder(term_name, newOrder), size = `negative_log10_of_adjusted_p_value`), color= "#d55e00",alpha=0.8) +
+    facet_grid(source ~ .) +
+    scale_color_brewer(palette="Set1") +
+scale_size(range = c(0.3, 3), breaks=as.vector(bs), labels=c("1.0","1.5","2.0","2.5","3.0","3.5","4.0")) +
+    scale_x_continuous(limits = c(0,16), breaks = seq(0, 15, by = 5)) +
+    xlab("Enrichment (%)") +
+    ylab("Pathways") +
+    theme_bw() +
+    theme(axis.text.x = element_text(color = "black", size = 6, face = "plain"),
+        axis.text.y = element_text(color = "black", size = 6, face = "plain"),  
+        axis.title.x = element_text(color = "black", size = 8, face = "plain"),
+        axis.title.y = element_text(color = "black", size = 8, face = "plain")) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+    theme(strip.background =element_rect(fill="#d55e00")) +
+    theme(strip.text = element_text(colour = 'white', size=8,face="bold")) +
+    theme(legend.title = element_text(color = "black", size = 6,face="bold"),
+          legend.text = element_text(color = "black", size = 6)) +
+    theme(plot.margin = unit(c(1, 3, 1, 1), "cm"))
+ggsave(paste("PathwayPlot1",".jpeg", sep = ""), plot = p1, device = "jpeg", scale = 1, width = 7, height = 3.3, units = "in", dpi = 300, limitsize = TRUE)
+ggsave(paste("PathwayPlot1",".pdf", sep = ""), plot = p1, device = "pdf", scale = 1, width = 7, height = 3.3, units = "in", dpi = 300, limitsize = TRUE)
+
+p2 = ggplot(data[data$source == "GO:CC"],) +
+  geom_point(aes(x = enrichment,y = reorder(term_name, newOrder), size = `negative_log10_of_adjusted_p_value`), color= "#0072b2",alpha=0.8) +
+  facet_grid(source ~ .) +
+  scale_color_brewer(palette="Set1") +
+  scale_size(range = c(0.3, 3), breaks=as.vector(bs), labels=c("1.0","1.5","2.0","2.5","3.0","3.5","4.0")) +
+  scale_x_continuous(limits = c(0,16), breaks = seq(0, 15, by = 5)) +
+  xlab("Enrichment (%)") +
+  ylab("Pathways") +
+  theme_bw() +
+  theme(axis.text.x = element_text(color = "black", size = 6, face = "plain"),
+        axis.text.y = element_text(color = "black", size = 6, face = "plain"),  
+        axis.title.x = element_text(color = "black", size = 8, face = "plain"),
+        axis.title.y = element_text(color = "black", size = 8, face = "plain")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(strip.background =element_rect(fill="#0072b2")) +
+  theme(strip.text = element_text(colour = 'white', size=8,face="bold")) +
+  theme(legend.title = element_text(color = "black", size = 6,face="bold"),
+        legend.text = element_text(color = "black", size = 6)) +
+  theme(plot.margin = unit(c(1, 3, 1, 1), "cm"))
+ggsave(paste("PathwayPlot2",".jpeg", sep = ""), plot = p2, device = "jpeg", scale = 1, width = 7, height = 3.3, units = "in", dpi = 300, limitsize = TRUE)
+ggsave(paste("PathwayPlot2",".pdf", sep = ""), plot = p2, device = "pdf", scale = 1, width = 7, height = 3.3, units = "in", dpi = 300, limitsize = TRUE)
+
+p3 = ggplot(data[data$source == "GO:MF"],) +
+  geom_point(aes(x = enrichment,y = reorder(term_name, newOrder), size = `negative_log10_of_adjusted_p_value`), color= "#009e73",alpha=0.8) +
+  facet_grid(source ~ .) +
+  scale_color_brewer(palette="Set1") +
+  scale_size(range = c(0.3, 3), breaks=as.vector(bs), labels=c("1.0","1.5","2.0","2.5","3.0","3.5","4.0")) +
+  scale_x_continuous(limits = c(0,16), breaks = seq(0, 15, by = 5)) +
+  xlab("Enrichment (%)") +
+  ylab("Pathways") +
+  theme_bw() +
+  theme(axis.text.x = element_text(color = "black", size = 6, face = "plain"),
+        axis.text.y = element_text(color = "black", size = 6, face = "plain"),  
+        axis.title.x = element_text(color = "black", size = 8, face = "plain"),
+        axis.title.y = element_text(color = "black", size = 8, face = "plain")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(strip.background =element_rect(fill="#009e73")) +
+  theme(strip.text = element_text(colour = 'white', size=8,face="bold")) +
+  theme(legend.title = element_text(color = "black", size = 6,face="bold"),
+        legend.text = element_text(color = "black", size = 6)) +
+  theme(plot.margin = unit(c(1, 3, 1, 1), "cm"))
+ggsave(paste("PathwayPlot3",".jpeg", sep = ""), plot = p3, device = "jpeg", scale = 1, width = 6.5, height = 3.3, units = "in", dpi = 300, limitsize = TRUE)
+ggsave(paste("PathwayPlot3",".pdf", sep = ""), plot = p3, device = "pdf", scale = 1, width = 6.5, height = 3.3, units = "in", dpi = 300, limitsize = TRUE)
+
+```
+
+#### Data visualization - Forest plot
+
+```
+dat <- fread("Meta_forest.txt")
+level_order <- c('META','COURAGE-PD','UKBB',  'AMP-PD','IPDGC')
+resilience_plot <- ggplot(data=dat, aes(x = factor(COHORT,levels = level_order),
+                         y = BETA,
+                         ymin = L95,
+                         ymax = U95)
+) +
+  geom_pointrange(
+    aes(ymin = L95,
+        ymax = U95),
+    cex = 0.7
+  ) +
+  geom_hline(
+    yintercept = 0,
+    linetype = 2) +
+  theme(plot.title = element_text(size = 20,
+                                  face = "bold"),
+        axis.text.y = element_text(size = 8,
+                                   face = 'bold'),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(face="bold"),
+        axis.title = element_text(size = 16,
+                                  face="bold"),
+        legend.position = "none"
+  ) +
+  xlab(' ') +
+  ylab("Beta coefficient") +
+  coord_flip() +
+  theme_minimal() +
+  ggtitle("Polygenic resilience score") +
+  theme(plot.title = element_text(hjust=0.5))
+
+
+ggsave("Forestplot-resilience.jpg", plot = resilience_plot,
+       width = 8, height = 5, 
+       units = "in", # other options c("in", "cm", "mm"), 
+       dpi = 500)
+
+```
+
