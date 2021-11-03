@@ -986,18 +986,7 @@ plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --sco
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --score AMP_formatted_PRS_resilience.snps.toscore.txt --out ALL_AMP_PD_RESILIENCE
 ```
 
-#### META for all cohorts
-```
-R
-install.packages("rmeta")
-library(rmeta)
-library(data.table)
-sumstats <- fread("summary.txt", header = T)
-met <- meta.summaries(d = sumstats$BETA, se = sumstats$SE, method = c("fixed"), logscale = F, names = sumstats$COHORT) # logscale option set for OR.
-met$test # gives you the Z and P for the meta-analysis.
-```
-
-#############################################################################################################################
+##############################################################################################
 
 #### META for all cohorts
 ```
@@ -1010,7 +999,7 @@ met <- meta.summaries(d = sumstats$BETA, se = sumstats$SE, method = c("fixed"), 
 met$test # gives you the Z and P for the meta-analysis.
 ```
 
-#############################################################################################################################
+###############################################################################################
 
 #### Polygenic resilience score accounting for LRRK2 G2019S and GBA N370S status
 
