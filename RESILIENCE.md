@@ -131,43 +131,6 @@ data$zSCORE <- (data$SCORE - meanControls)/sdControls
 Model <- glm(CASE ~ zSCORE + AGE + sex + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10, data = data, family = 'binomial')
 summary(Model)
 
-# > summary(Model)
-# Call:
-# glm(formula = CASE ~ zSCORE + AGE + sex + PC1 + PC2 + PC3 + PC4 + 
-#     PC5 + PC6 + PC7 + PC8 + PC9 + PC10, family = "binomial", 
-#     data = data)
-# 
-# Deviance Residuals: 
-#     Min       1Q   Median       3Q      Max  
-# -2.1209  -1.2272   0.7537   0.9678   1.6546  
-# 
-# Coefficients:
-#              Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)  2.170938   0.118050  18.390  < 2e-16 ***
-# zSCORE       0.353827   0.020366  17.373  < 2e-16 ***
-# AGE         -0.011371   0.001535  -7.410 1.26e-13 ***
-# sex         -0.688730   0.040754 -16.900  < 2e-16 ***
-# PC1         11.911682   4.512153   2.640  0.00829 ** 
-# PC2         -3.604525   3.983284  -0.905  0.36551    
-# PC3          2.898928   4.129909   0.702  0.48272    
-# PC4         -8.850907   4.179341  -2.118  0.03419 *  
-# PC5         -3.096120   3.991377  -0.776  0.43792    
-# PC6         -8.713972   4.034589  -2.160  0.03079 *  
-# PC7          3.966482   4.056270   0.978  0.32814    
-# PC8          3.211387   4.020397   0.799  0.42442    
-# PC9         -1.822958   4.083083  -0.446  0.65526    
-# PC10         3.386459   3.959063   0.855  0.39235    
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# (Dispersion parameter for binomial family taken to be 1)
-# 
-#     Null deviance: 14616  on 11032  degrees of freedom
-# Residual deviance: 13887  on 11019  degrees of freedom
-#   (5583 observations deleted due to missingness)
-# AIC: 13915
-# 
-# Number of Fisher Scoring iterations: 4
 ```
 
 #### d) Make a density plot
@@ -202,7 +165,7 @@ write.table(training_data, file = "Training_individuals_highriskquantile.txt", q
 plink --bfile /data/LNG/saraB/PRS_resilience/ALL_no_MHC_noNeurox --keep Training_individuals_highriskquantile.txt --make-bed --out Training_cases_controls_noNeuroX_highriskquantile
 ```
 
-#### g) Exclude signals at 1e-3 in Chang et al., 2017 + 1Mb upstream/downstream to avoid following analyses
+#### g) Exclude signals at 1e-3 in Chang et al., 2017 + 1Mb upstream/downstream to avoid following analyses being biased by risk
 ```
 plink --bfile Training_cases_controls_noNeuroX_highriskquantile --exclude range /data/LNG/saraB/PRS_resilience/REVIEWS/listofregions.txt --make-bed --out Training_cases_controls_highriskquantile_no_regions
 ```
