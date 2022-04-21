@@ -32,7 +32,7 @@ module load plink/2.0_alpha_1_final
 module load plink
 module load R
 
-cd /data/LNG/saraB/PRS_resilience/FINAL/
+cd /data/LNG/saraB/PRS_resilience/FINAL/REVIEWS/
 ```
 
 ---
