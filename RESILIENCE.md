@@ -2,6 +2,30 @@
 
 Sara Bandres-Ciga, Hui Liu, Mohammad Dehestani
 
+## Table of Contents
+
+#### [0. Getting Started](#0)
+
+#### [1. IPDGC data](#1)
+
+#### [2. UKBB data](#2)
+
+#### [3. AMP-PD](#3)
+
+#### [4. Pearson](#4)
+
+#### [5. Meta-analysis](#5)
+
+#### [6. Polygenic resilience score accounting for LRRK2 G2019S and GBA N370S status](#6)
+
+#### [7. Heritability](#7)
+
+#### [8. Functional enrichment](#8)
+
+---
+<a id="0"></a>
+## 0. Getting Started
+
 #### Load modules and set up working directory
 ```
 module load plink/2.0_alpha_1_final
@@ -11,7 +35,10 @@ module load R
 cd /data/LNG/saraB/PRS_resilience/FINAL/
 ```
 
-### 1. IPDGC data - 7204 are cases and 9412 are controls
+---
+<a id="1"></a>
+## 1. IPDGC data
+
 #### Remove problematic regions from Chang 2017 summary stats + filter by MAF 0.01
 ```
 MHC region (hg19): chr6:28477797-33448354
@@ -170,14 +197,14 @@ training_data = subset(data, zSCORE >= decile_Z_controls & zSCORE <= max_Z_contr
 write.table(training_data, file = "Training_individuals_highriskquantile.txt", quote = F, row.names = F, sep = "\t")
 ```
 
-#### f) Extract IPDGC individuals (cases/controls) in the upper quantile (25%) from plink binaries -  3011 are cases and 2353 are controls.
+#### f) Extract IPDGC individuals (cases/controls) in the upper quantile (25%) from plink binaries
 ```
 plink --bfile /data/LNG/saraB/PRS_resilience/ALL_no_MHC_noNeurox --keep Training_individuals_highriskquantile.txt --make-bed --out Training_cases_controls_noNeuroX_highriskquantile
 ```
 
-#### g) Exclude 90 PD hits + 1Mb upstream/downstream to avoid following analyses
+#### g) Exclude signals at 1e-3 in Chang et al., 2017 + 1Mb upstream/downstream to avoid following analyses
 ```
-plink --bfile Training_cases_controls_noNeuroX_highriskquantile --exclude range /data/LNG/saraB/PRS_resilience/listofregions.txt --make-bed --out Training_cases_controls_highriskquantile_no_regions
+plink --bfile Training_cases_controls_noNeuroX_highriskquantile --exclude range /data/LNG/saraB/PRS_resilience/REVIEWS/listofregions.txt --make-bed --out Training_cases_controls_highriskquantile_no_regions
 ```
 
 #### h) Run a GWAS in the top 25% of risk, this will give you betas that are specific to the Training set. 
@@ -237,7 +264,7 @@ fam_subsetted1 <- subset(fam, random > 7)
 write.table(fam_subsetted1, "subsetted_Training_cases_controls_highriskquantile_no_regions.txt", quote = F, sep = "\t", row.names = F, col.names = F)
 ```
 ### Polygenic resilience
-#### a) Extract 70% of the data - 2124 cases and 1632 controls remaining after main filters = 3756 samples
+#### a) Extract 70% of the data
 ```
 plink --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --make-bed --out SEVENTY_training_resilience_GWAS
 plink2 --bfile Training_cases_controls_highriskquantile_no_regions --remove subsetted_Training_cases_controls_highriskquantile_no_regions.txt --maf 0.05 --hwe 0.00001 --covar /data/LNG/saraB/WGS/noage_toPRSice_phenosAndCovs_renamed.tab --glm hide-covar --out SEVENTY_training_resilience_GWAS 
@@ -296,7 +323,6 @@ write.table(total2, "SEVENTY_IPDGC_toscore_1e3.txt", quote = F, sep = "\t", row.
 ```
 
 ```
-## 887 are cases and 721 are controls.
 plink --bfile Training_cases_controls_highriskquantile_no_regions --keep subsetted_Training_cases_controls_highriskquantile_no_regions.txt --score SEVENTY_IPDGC_toscore_1e3.txt --out IPDGC_resilience_THIRTY 
 ```
 
@@ -317,35 +343,7 @@ analysis_df['TEST'] = analysis_df['PHENO'] - 1
 this_formula = "TEST ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + sex"
 res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
 res.summary()
-# 
-#                  Generalized Linear Model Regression Results                  
-# ==============================================================================
-# Dep. Variable:                   TEST   No. Observations:                 1608
-# Model:                            GLM   Df Residuals:                     1595
-# Model Family:                Binomial   Df Model:                           12
-# Link Function:                  logit   Scale:                          1.0000
-# Method:                          IRLS   Log-Likelihood:                -1066.6
-# Date:                Fri, 25 Jun 2021   Deviance:                       2133.1
-# Time:                        14:52:56   Pearson chi2:                 1.61e+03
-# No. Iterations:                     4                                         
-# Covariance Type:            nonrobust                                         
-# ==============================================================================
-#                  coef    std err          z      P>|z|      [0.025      0.975]
-# ------------------------------------------------------------------------------
-# Intercept      1.0973      0.161      6.816      0.000       0.782       1.413
-# PRS_Z          0.2101      0.053      3.993      0.000       0.107       0.313
-# PC1           -8.0702     10.341     -0.780      0.435     -28.339      12.198
-# PC2           33.7868     10.897      3.101      0.002      12.429      55.145
-# PC3            9.9624     10.580      0.942      0.346     -10.775      30.700
-# PC4            8.7896     10.701      0.821      0.411     -12.183      29.763
-# PC5            0.0060     10.614      0.001      1.000     -20.796      20.808
-# PC6          -30.7987     10.416     -2.957      0.003     -51.214     -10.384
-# PC7            9.3624     10.294      0.909      0.363     -10.814      29.539
-# PC8            2.2187     11.329      0.196      0.845     -19.987      24.424
-# PC9           18.8174     10.727      1.754      0.079      -2.207      39.842
-# PC10          -5.3844     10.162     -0.530      0.596     -25.301      14.532
-# sex           -0.6016      0.103     -5.815      0.000      -0.804      -0.399
-# ==============================================================================
+
 ```
 
 #### f) Violin plot
@@ -365,10 +363,9 @@ p2 <- p+geom_boxplot(width=0.4, fill="white" ) + theme_minimal()
 p2 + scale_fill_manual(values=c("lightblue", "orange")) + theme_bw() + ylab("Resilience IPDGC data (Z-transformed)") +xlab("") + theme(legend.position = "none")
 ggsave("resilience_IPDGC.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 ```
-
-#############################################################################################################################
-
-### 2. UKBB data - 2639 are cases and 14301 are controls
+---
+<a id="2"></a>
+## 2. UKBB data
 
 #### Format cov file 
 ```
@@ -420,7 +417,6 @@ cp Testing.UKBB.clumped_ALL_updated.bed FINAL_Testing.UKBB.clumped_ALL_updated.b
 ```
 
 ```
-## 1030 predictors loaded
 plink --bfile FINAL_Testing.UKBB.clumped_ALL_updated --score Chang_1e3.toscore.txt --out PRS_risk_threshold_3e1.snps.Testing.UKBB
 ```
 
@@ -442,22 +438,6 @@ data$zSCORE <- (data$SCORE - meanControls)/sdControls
 Model <- glm(CASE ~ zSCORE + AGE_OF_RECRUIT + GENETIC_SEX + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10, data = data, family = 'binomial')
 summary(Model)
 
-# Coefficients:
-#                 Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)     3.953843   0.384230  10.290   <2e-16 ***
-# zSCORE          0.215365   0.021678   9.935   <2e-16 ***
-# AGE_OF_RECRUIT -0.094690   0.006069 -15.603   <2e-16 ***
-# GENETIC_SEX     0.619085   0.044266  13.985   <2e-16 ***
-# PC1            -1.088319   1.233096  -0.883   0.3775    
-# PC2             1.645119   1.422492   1.157   0.2475    
-# PC3             2.770907   1.426747   1.942   0.0521 .  
-# PC4            -0.525241   1.423121  -0.369   0.7121    
-# PC5             0.343819   1.422733   0.242   0.8090    
-# PC6             1.355441   1.429791   0.948   0.3431    
-# PC7            -0.114277   1.428759  -0.080   0.9363    
-# PC8            -1.712985   1.429464  -1.198   0.2308    
-# PC9             1.071797   1.430367   0.749   0.4537    
-# PC10            0.217127   1.430843   0.152   0.8794    
 ```
 
 #### c) Make density plot
@@ -489,7 +469,6 @@ write.table(training_data, file = "Testing_UKBB_individuals_highriskquantile.txt
 
 #### e) Extract individuals (cases/controls) in the in the upper quantile (25%) from plink binaries
 ```
-## 847 are cases and 3576 are controls.
 plink --bfile Testing.UKBB.clumped_ALL_updated --keep Testing_UKBB_individuals_highriskquantile.txt --make-bed --out Testing_UKBB_cases_controls_highriskquantile
 ```
 
@@ -572,7 +551,6 @@ cp Testing.UKBB.resilience_GWAS_subset.bed Testing.UKBB.resilience_GWAS_subset_R
 ```
 
 ```
-## 847 are cases and 3576 are controls. 802 valid predictors loaded.
 plink --bfile Testing.UKBB.resilience_GWAS_subset_REFORMATTED --score /data/LNG/saraB/PRS_resilience/ML/SEVENTY_IPDGC_toscore_1e3.txt --out UKBB_resilience 
 ```
 
@@ -597,38 +575,6 @@ analysis_df = temp_df.merge(cov_df, on='IID', how='inner')
 this_formula = "PHENO ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + AGE_OF_RECRUIT + TOWNSEND + GENETIC_SEX"
 res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
 res.summary()
-
-# """
-#                  Generalized Linear Model Regression Results                  
-# ==============================================================================
-# Dep. Variable:                  PHENO   No. Observations:                 4423
-# Model:                            GLM   Df Residuals:                     4408
-# Model Family:                Binomial   Df Model:                           14
-# Link Function:                  logit   Scale:                          1.0000
-# Method:                          IRLS   Log-Likelihood:                -1545.2
-# Date:                Sun, 26 Sep 2021   Deviance:                       3090.4
-# Time:                        16:40:33   Pearson chi2:                 4.51e+03
-# No. Iterations:                     5                                         
-# Covariance Type:            nonrobust                                         
-# ==================================================================================
-#                      coef    std err          z      P>|z|      [0.025      0.975]
-# ----------------------------------------------------------------------------------
-# Intercept          2.2312      0.871      2.562      0.010       0.525       3.938
-# PRS_Z              0.0675      0.048      1.416      0.157      -0.026       0.161
-# PC1               -0.0270      0.032     -0.851      0.395      -0.089       0.035
-# PC2               -0.0568      0.032     -1.759      0.079      -0.120       0.006
-# PC3                0.0100      0.031      0.319      0.750      -0.051       0.071
-# PC4               -0.0154      0.023     -0.667      0.505      -0.061       0.030
-# PC5                0.0142      0.010      1.403      0.161      -0.006       0.034
-# PC6                0.0030      0.030      0.098      0.922      -0.057       0.063
-# PC7                0.0134      0.027      0.499      0.618      -0.039       0.066
-# PC8               -0.0253      0.027     -0.926      0.354      -0.079       0.028
-# PC9                0.0074      0.011      0.668      0.504      -0.014       0.029
-# PC10               0.0228      0.023      0.982      0.326      -0.023       0.068
-# AGE_OF_RECRUIT    -0.0731      0.012     -5.852      0.000      -0.098      -0.049
-# TOWNSEND           0.0052      0.017      0.305      0.761      -0.028       0.038
-# GENETIC_SEX        0.5214      0.097      5.360      0.000       0.331       0.712
-# ==================================================================================
 ```
 
 #### b) Violin plot
@@ -648,9 +594,9 @@ p2 <- p+geom_boxplot(width=0.4, fill="white" ) + theme_minimal()
 p2 + scale_fill_manual(values=c("lightgreen", "red")) + theme_bw() + ylab("Resilience UKB data (Z-transformed)") +xlab("") + theme(legend.position = "none")
 ggsave("resilience_UKB.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 ```
-################################################################################################################
-
-### 3. AMP_PD data - version 2.5 - 2248 are cases and 2817 are controls
+---
+<a id="3"></a>
+## 3. AMP_PD data
 
 #### Format cov file
 ```
@@ -722,34 +668,6 @@ data$zSCORE <- (data$SCORE - meanControls)/sdControls
 Model <- glm(CASE ~ zSCORE + SEX.x + PC1 + PC2 + PC3 + PC4 + PC5, data = data, family = 'binomial')
 summary(Model)
 
-# Call:
-# glm(formula = CASE ~ zSCORE + SEX.x + PC1 + PC2 + PC3 + PC4 + 
-#     PC5, family = "binomial", data = data)
-# 
-# Deviance Residuals: 
-#     Min       1Q   Median       3Q      Max  
-# -1.7279  -1.0651  -0.6375   1.1285   2.1950  
-# 
-# Coefficients:
-#             Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)  0.68506    0.10312   6.643 3.07e-11 ***
-# zSCORE       0.28342    0.03007   9.424  < 2e-16 ***
-# SEX.x       -0.61364    0.05997 -10.232  < 2e-16 ***
-# PC1         -1.91955    2.14263  -0.896    0.370    
-# PC2          0.62414    0.97015   0.643    0.520    
-# PC3         16.45497    2.94593   5.586 2.33e-08 ***
-# PC4          0.45109    1.12928   0.399    0.690    
-# PC5          0.45375    1.27301   0.356    0.722    
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# (Dispersion parameter for binomial family taken to be 1)
-# 
-#     Null deviance: 6957.5  on 5064  degrees of freedom
-# Residual deviance: 6473.8  on 5057  degrees of freedom
-# AIC: 6489.8
-# 
-# Number of Fisher Scoring iterations: 4
 ```
 
 #### c) Make a density plot
@@ -898,35 +816,11 @@ this_formula = "TEST ~ PRS_Z + PC1 + PC2 + PC3 + PC4 + PC5 + SEX"
 res = sm.formula.glm(formula=this_formula, family=sm.families.Binomial(), data=analysis_df).fit() 
 res.summary()
 
-#                  Generalized Linear Model Regression Results                  
-# ==============================================================================
-# Dep. Variable:                   TEST   No. Observations:                 1503
-# Model:                            GLM   Df Residuals:                     1495
-# Model Family:                Binomial   Df Model:                            7
-# Link Function:                  logit   Scale:                          1.0000
-# Method:                          IRLS   Log-Likelihood:                -973.90
-# Date:                Sun, 26 Sep 2021   Deviance:                       1947.8
-# Time:                        18:37:45   Pearson chi2:                 1.50e+03
-# No. Iterations:                     4                                         
-# Covariance Type:            nonrobust                                         
-# ==============================================================================
-#                  coef    std err          z      P>|z|      [0.025      0.975]
-# ------------------------------------------------------------------------------
-# Intercept      1.3782      0.193      7.155      0.000       1.001       1.756
-# PRS_Z          0.0232      0.054      0.427      0.669      -0.083       0.130
-# PC1            4.5168      4.092      1.104      0.270      -3.504      12.537
-# PC2            0.8375      1.777      0.471      0.637      -2.646       4.321
-# PC3           25.1833      5.692      4.424      0.000      14.027      36.340
-# PC4            1.6135      2.151      0.750      0.453      -2.602       5.829
-# PC5           -0.7417      2.284     -0.325      0.745      -5.218       3.735
-# SEX           -0.7258      0.109     -6.681      0.000      -0.939      -0.513
-# ==============================================================================
-
 ## META-ANALYSIS (RESILIENCE SCORE)
 # Make a table with estimates:
 # COHORT	BETA	SE	P
 # AMP_PD  	value	value	value
-# UKB	value	0.052	value
+# UKB	value	value	value
 # IPDGC	value	value	value
 ```
 
@@ -948,7 +842,11 @@ p2 + scale_fill_manual(values=c("yellow", "purple")) + theme_bw() + ylab("Resili
 ggsave("resilience_AMP_PD.jpeg", dpi = 600, units = "in", height = 6, width = 6)
 
 ```
-### PEARSON correlations
+
+---
+<a id="4"></a>
+## 4. Pearson correlations
+
 #### IPDGC 
 ```
 ## 7204 are cases and 9412 are controls. 1060 valid predictors loaded.
@@ -986,7 +884,9 @@ plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --sco
 plink --bfile updated_AMP_PD_v2_clean_unrelated_eur --maf 0.05 --geno 0.01 --score AMP_formatted_PRS_resilience.snps.toscore.txt --out ALL_AMP_PD_RESILIENCE
 ```
 
-##############################################################################################
+---
+<a id="5"></a>
+## 5. Meta-analysis
 
 #### META for all cohorts
 ```
@@ -999,9 +899,9 @@ met <- meta.summaries(d = sumstats$BETA, se = sumstats$SE, method = c("fixed"), 
 met$test # gives you the Z and P for the meta-analysis.
 ```
 
-###############################################################################################
-
-#### Polygenic resilience score accounting for LRRK2 G2019S and GBA N370S status
+---
+<a id="6"></a>
+## 6. Polygenic resilience score accounting for LRRK2 G2019S and GBA N370S status
 
 ```
 ## Identify LRRK2 G2019S and GBA N370S carriers
@@ -1198,9 +1098,9 @@ Model_GBA <- glm(CASE ~ zSCORE + AGE + SEX + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 +
 summary(Model_GBA)
 
 ```
-#########################################################################################
-
-#### Heritability analyses through LDSC
+---
+<a id="7"></a>
+## 7. Heritability analyses through LDSC
 
 ```
 ## Reformat summary statistics for LDSC
@@ -1238,10 +1138,9 @@ ldsc.py \
 less Resilience_all_LDSC.log 
 
 ```
-
-##############################################################################################
-
-#### Data visualization - Functional Enrichment
+---
+<a id="8"></a>
+## 8. Functional Enrichment 
 
 ```
 module load R/4.0
